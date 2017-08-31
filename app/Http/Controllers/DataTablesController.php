@@ -361,8 +361,13 @@ class DataTablesController extends Controller
     $row_count = count($db_rows);
     
     $db_rows_paginated = DB::select(
-      " SELECT l.id, l.quote_requested, l.cust_name, l.tel, l.email
-          FROM lead_relation_agency la LEFT JOIN leads l ON la.lead_id =l.id
+      " SELECT l.id, l.quote_requested, l.cust_name, l.tel, l.email,
+            IF(lc.id >0 OR lq.id >0, 1,0) is_project
+          FROM lead_relation_agency la
+            LEFT JOIN leads l ON la.lead_id =l.id
+              LEFT JOIN lead_locations ll ON l.id = ll.lead_id
+                LEFT JOIN lead_current_accounts lc ON ll.id =lc.location_id AND lc.is_project >0
+                LEFT JOIN lead_current_accounts lq ON ll.id =lq.location_id AND lq.is_project >0
           WHERE la.agency_id =:id AND l.id >0
             GROUP BY l.id
           ORDER BY l.quote_requested DESC, l.id DESC
@@ -373,13 +378,15 @@ class DataTablesController extends Controller
     if (count($db_rows_paginated) >0) {
       foreach ($db_rows_paginated as $row) {
         $r_enc_id = enc_id($row->id);
-        $r_status = ($row->quote_requested)?  'Quote Requested' : 'Open';
+        
+        if ($row->is_project)
+          $r_status = 'Project Management';
+        elseif ($row->quote_requested)
+          $r_status = 'Quote Requested';
+        else
+          $r_status = 'Open';
 
-        $r_cell_act = 
-          Form::open(['url'=> route('lead.delete', ['id'=> $r_enc_id]), 'method'=>'DELETE']).'
-            <a href="'.route('lead.manage',['id'=> $r_enc_id]).'"><i title="Manage Lead" class="md s btn-mod-item">edit</i></a>
-            <i title="Delete Customer" class="md s btn-close-item">close</i>
-          '.Form::close();
+        $r_cell_act = '<a href="'.route('lead.manage',['id'=> $r_enc_id]).'"><i title="Manage Lead" class="md s btn-mod-item">edit</i></a>';
         /*
         <th></th>
         <th>Status</th>
