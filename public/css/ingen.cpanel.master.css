@@ -1,0 +1,121 @@
+/***** user list/view/edit *****/
+.panel-user-mod-assign-list .dataTables_scroll { border: 1px solid #ccc; border-width: 1px 0; }
+.panel-user-mod-assign-list .dataTables_scrollHead { display: none; }
+.panel-user-mod-assign-list .dataTable { border-width: 2px 3px; }
+.panel-user-mod-assign-list thead { display: none; }
+.panel-user-mod-assign-list td input[type=radio] { position: absolute; top: 3px; left: 5px; }
+.panel-user-mod-assign-list td label { display: block; padding-left: 30px; }
+.panel-user-mod-assign-list .item-unassigned { margin-top: 10px; padding-left: 8px; }
+
+.tbl-user-agent td:nth-child(1) { width: 30px; }
+
+.overlay-form .user-agent-wrapper { width: calc(50% - 50px); }
+.overlay-form .user-agent-wrapper + .user-agent-wrapper { margin-left: 50px; }
+.overlay-form .user-agent-wrapper [class*="list-"] { max-height: 300px; overflow-y: auto; margin: 10px 0; padding: 20px 0; border-top: 1px solid #ccc; }
+.overlay-form .user-agent-wrapper .list-available table,
+.overlay-form .user-agent-wrapper .list-available td { border: 0; background: none; }
+.overlay-form .user-agent-wrapper .list-available thead { display: none; }
+.overlay-form .user-agent-wrapper .list-available .dataTables_filter label::before {
+  content: "\f002"; z-index: 1; position: absolute; display: block; top: 1px; left: 15px; font: normal normal normal 14px/1 FontAwesome;
+}
+.overlay-form .user-agent-wrapper .list-available .dataTables_filter input[type=search] { margin: 0 0 10px 5px; padding-left: 30px; }
+
+@media screen and (max-width: 700px) {
+  .overlay-form .user-agent-wrapper { width: 100%; }
+  .overlay-form .user-agent-wrapper + .user-agent-wrapper { margin-top: 30px; margin-left: 0; }
+  .overlay-form .user-agent-wrapper .list-available .dataTables_filter input[type=search] { margin-left: 0; }
+}
+
+/***** provier list/view/edit *****/
+.tbl-provider-list th:nth-child(1) { width: 80px; }
+.tbl-provider-list th:nth-child(2) { width: 100px; }
+.tbl-provider-list th:nth-child(5),
+.tbl-provider-list th:nth-child(6),
+.tbl-provider-list th:nth-child(7),
+.tbl-provider-list th:nth-child(8) { width: 120px; }
+.tbl-provider-list th:nth-child(9) { width: 100px; }
+
+.agent-ratio { font-size: 0; }
+.agent-ratio .col-n { width: calc(50% - 10px); }
+.agent-ratio .col-n input { width: 100%; }
+.agent-ratio .col-n:nth-child(2) { width: 20px; text-align: center; font-size: 0.75rem; }
+
+/***** predefined-service list/view/edit *****/
+.tbl-svc-list { width: 600px; }
+.tbl-svc-list tbody td { white-space: nowrap; }
+.tbl-svc-list tr.parent td { font-weight: bold; }
+.tbl-svc-list tr.parent td:nth-child(2) { color: #387ef5; font-weight: bold; }
+.tbl-svc-list tr:not(.parent) td:nth-child(3) { padding-left: 20px; }
+.tbl-svc-list th:nth-child(1) { width: 60px; }
+
+ /***** leads: agency/manager list  *****/
+.wrapper.lead-management .lead-control-account .ctrl-commission ul { margin-bottom: 10px; list-style: none; }
+.wrapper.lead-management .lead-control-account .ctrl-commission li { margin-bottom: 5px; }
+.wrapper.lead-management .lead-control-account .ctrl-commission li::aftter { content: ''; display: block; clear: both; height: 1px; }
+.wrapper.lead-management .lead-control-account .ctrl-commission .btn-manager-primary { color: #ccc; }
+.wrapper.lead-management .lead-control-account .ctrl-commission .btn-manager-primary:hover { color: #f00; }
+
+#overlay-pane .overlay-list-frame.lead-list-manager,
+ #overlay-pane .overlay-list-frame.lead-list-agency { min-height: 180px; max-height: calc(100% - 100px); }
+
+ /***** leads: quote x products *****/
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(1) { width: 30px; }
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(2) { width: 120px; }
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(3) { width: 120px; }
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(4) { width: 150px; }
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(5),
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(6),
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(7) { width: 100px; }
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(8) { width: 60px; }
+.overlay-lead-product .tbl-lead-prod-list thead th:nth-child(9) { width: 120px; }
+.overlay-lead-product .tbl-lead-prod-list tbody td:nth-child(5) input,
+.overlay-lead-product .tbl-lead-prod-list tbody td:nth-child(6) input,
+.overlay-lead-product .tbl-lead-prod-list tbody td:nth-child(7) input { width: calc(100% - 30px); }
+.overlay-lead-product .tbl-lead-prod-list.curr-accnt thead th:nth-child(5) { width: 100px; }
+.overlay-lead-product .tbl-lead-prod-list.curr-accnt thead th:nth-child(6) { width: 60px; }
+.overlay-lead-product .tbl-lead-prod-list.curr-accnt thead th:nth-child(7) { width: 120px; }
+.overlay-lead-product .tbl-lead-prod-list.curr-accnt tbody td:nth-child(6) input { width: 100%; }
+
+ /***** leads: commission rates *****/
+#overlay-pane .frm-commission { overflow-x: auto; }
+#overlay-pane .tbl-lead-commission { min-width: 100%; width: auto; }
+#overlay-pane .tbl-lead-commission tr.title th,
+ #overlay-pane .tbl-lead-commission tr > :nth-child(2n + 1) { border-right-width: 2px; }
+#overlay-pane .tbl-lead-commission tr td:first-child { padding: 3px 5px; font-size: 12px; }
+#overlay-pane .tbl-lead-commission thead th:first-child { min-width: 200px; width: 200px; }
+#overlay-pane .tbl-lead-commission thead tr:first-child th { border-bottom-width: 1px; }
+#overlay-pane .tbl-lead-commission thead tr + tr th { min-width: 82px; border-top-width: 1px; }
+#overlay-pane .tbl-lead-commission tbody td { padding: 0; background: none !important; font-size: 0; }
+#overlay-pane .tbl-lead-commission tbody td label { 
+  display: inline-block; vertical-align: top;
+  width: 30px; height: 29px; line-height: 29px; background: #eee; border-left: 1px solid #ccc;
+  text-align: center; font-size: 12px;
+}
+#overlay-pane .tbl-lead-commission tbody td label:last-child { border-right: 0; }
+#overlay-pane .tbl-lead-commission input { min-width: 50px; width: calc(100% - 30px); border: 0; border-radius: 0; text-align: right; }
+#overlay-pane .tbl-lead-commission tbody.tbody-fill tr.btns td { padding: 5px 5px 20px; text-align: center; font-size: 12px; }
+#overlay-pane .tbl-lead-commission tbody.tbody-fill tr.btns button { margin: 0; }
+
+
+@media screen and (max-width: 700px) {
+  /*** provider list responsive table on mobile ***/
+  .tbl-provider-list td:nth-child(1)::before { display: none; }
+  .tbl-provider-list td:nth-child(1) { padding-left: 5px; }
+  .tbl-provider-list td:nth-child(2)::before { content: 'Mod'; }
+  .tbl-provider-list td:nth-child(3)::before { content: 'Name'; }
+  .tbl-provider-list td:nth-child(4)::before { content: 'Address'; }
+  .tbl-provider-list td:nth-child(5)::before { content: 'Tel'; }
+  .tbl-provider-list td:nth-child(6)::before { content: 'Default Term'; }
+  .tbl-provider-list td:nth-child(7)::before { content: 'Spiff'; }
+  .tbl-provider-list td:nth-child(8)::before { content: 'Residual'; }
+  .tbl-provider-list td:nth-child(9)::before { content: 'Status'; }
+
+  .agent-ratio .col-n input { min-width: initial; }
+
+  /*** predefined-service list responsive table on mobile ***/
+  .tbl-svc-list td:nth-child(1)::before { display: none; }
+  .tbl-svc-list td:nth-child(1) { padding-left: 5px; }
+  .tbl-svc-list td:nth-child(2)::before { content: 'ID'; }
+  .tbl-svc-list td:nth-child(3)::before { content: 'Parent Service'; }
+  .tbl-svc-list td:nth-child(4)::before { content: 'Service Name'; }
+}

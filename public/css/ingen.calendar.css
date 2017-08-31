@@ -1,0 +1,45 @@
+/************************** style associated with ingen.calendar.js *********************/
+.ingen-calendar {
+  display: none; position: absolute; z-index: 100;
+  margin-left: 20px; width: 300px;
+  background: #fff;
+  border: 2px solid #999; border-radius: 5px;
+  box-shadow: 0 3px 10px rgba(0,0,0, 0.3);
+}
+
+.ingen-calendar .nav { padding:10px 0; margin-bottom: 5px; background: #ddd; border-radius: 3px 3px 0 0; border-bottom: 1px solid #bbb; }
+.ingen-calendar .nav .sel-month { min-width: initial; /* for IE */ min-width: auto; width:70px; margin: 0 20px; }
+.ingen-calendar .nav .month { display: inline-block; width: calc(50% - 50px); }
+.ingen-calendar .nav .year {
+  display: inline-block; box-sizing: border-box;
+  width: calc(50% + 50px); padding: 5px;
+  text-align: center; font-weight: bold;
+}
+.ingen-calendar .nav .year .yr { line-height: 24px; }
+.ingen-calendar .nav .year span { margin:0 5px; vertical-align: top; }
+.ingen-calendar .nav .header { margin-top: 10px; }
+.ingen-calendar .nav .header .cell { font-weight: bold; }
+
+.ingen-calendar .tbl { display: table; width: 100%; text-align: center; }
+.ingen-calendar .tbl .row { display: table-row; }
+.ingen-calendar .tbl .cell { display: table-cell; width: 30px; text-align: center; }
+.ingen-calendar .tbl .cell.wknd { color: #f53d3d; }
+.ingen-calendar .days .row:hover { background: #f7f7f7; }
+.ingen-calendar .days .cell { height: 20px; font-size: 0.7rem; }
+.ingen-calendar .days .cell .link-day {
+  cursor: pointer; display: inline-block;
+  width: 35px; padding: 8px 5px;
+  border: 2px solid rgba(0,0,0,0);
+}
+.ingen-calendar .days .cell .link-day:hover { background: #fff; border-color: #bbb; }
+.ingen-calendar .days .cell .today { color: #387ef5; font-weight: bold; }
+
+.ingen-calendar .btns { padding:10px; text-align: center; }
+.ingen-calendar .btns input[type=button] { min-width: auto; margin: 0 5px; font-size: 11px; text-transform: uppercase; }
+
+@media (max-width: 700px) {
+  .ingen-calendar { top: 50% !important; left: 50% !important; margin: 0; transform: translate(-50%, -50%); }
+  .ingen-calendar .btns { padding:10px; text-align: center; }
+  .ingen-calendar .btns input[type=button],
+   .ingen-calendar .btns button { width: auto; }
+}
