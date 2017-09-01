@@ -81,6 +81,7 @@
     <div class='developer'>
       <p>Powered by <a href='//{{ DEVELOPER_WEB }}' target='_blank'><span class="title">{!! '<em>'.DEVELOPER_TITLE[0].'</em>'.substr(DEVELOPER_TITLE, 1) !!}</span></a></p>
       <p><a href='mailto:{{ DEVELOPER_EMAIL }}'>Contact Us ???</a></p>
+      <p><a href='mailto:{{ DEVELOPER_EMAIL }}'>Contact Us!!</a></p>
     </div>
   </footer>
   <div id="back-to-top" title="Scroll back to Top"></div>
