@@ -32,7 +32,7 @@ Route::group(['middleware' => ClearCache::class], function () {
   /**
    * ******************************************************* master (admin) page *******************************************************
    */
-  Route::group(['domain' => 'master.demo.app', 'middleware' => MasterPreapp::class], function () {
+  Route::group(['domain' => 'master.crm.app', 'middleware' => MasterPreapp::class], function () {
     Route::get('/', 'Master\MasterHomeController@index')->name('master.index');
     Route::get('/home', 'Master\MasterHomeController@index')->name('master.home');
 
