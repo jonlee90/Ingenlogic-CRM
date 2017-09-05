@@ -26,6 +26,13 @@
             <div class="popup-tip"><div>Update Location</div></div>
           </span>
           <span class="popup-base">
+            <i class="md md-btn btn-loc-file">attach_file</i>
+            @if ($loc->file_count)
+            <div class="lead-loc-file-count">{{ $loc->file_count }}</div>
+            @endif
+            <div class="popup-tip"><div>Attached Files</div></div>
+          </span>
+          <span class="popup-base">
             <i class="md md-btn btn-del-location">close</i>
             <div class="popup-tip right"><div>Delete Location</div></div>
           </span>
@@ -63,11 +70,11 @@
               <span class="popup-base">
                 <i class="md btn-accnt-curr-del">close</i>
                 <div class="popup-tip"><div>Remove Account</div></div>
-              </span>      
+              </span>
               {!! Form::open(['url'=> route('lead.accnt-proceed', ['id'=> enc_id($accnt->id)]), 'class'=> 'inline accnt-proceed', ]) !!}
                 <span class="popup-base">
                   <i class="md btn-accnt-curr-proceed">done</i>
-                  <div class="popup-tip"><div>Proceed to Project</div></div>
+                  <div class="popup-tip right"><div>Add to Project Management</div></div>
                 </span>
               {!! Form::close() !!}
             </div>

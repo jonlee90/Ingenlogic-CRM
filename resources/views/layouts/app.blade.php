@@ -61,6 +61,7 @@
       <li><a href="{{ route('provider.list') }}"><i class="md">build</i>Service Providers</a></li>
       @endif
       <li><a href="{{ route('lead.list') }}"><i class="md">device_hub</i>Leads</a></li>
+      <li><a href="{{ route('lead.list') }}"><i class="md">assignment_turned_in</i>Projects</a></li>
 
       <li>
         <i class="md btn-nav-expand">chevron_right</i>

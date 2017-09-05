@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Agency;
 use App\Provider;
+use App\Traits\LeadTrait;
 use Collective\Html\FormFacade as Form;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ use Validator;
 
 class LeadController extends Controller
 {
+  use LeadTrait;
   /*
   * custom variable
   */
@@ -216,160 +218,6 @@ class LeadController extends Controller
     $lead_id = dec_id($request->id);
     return $this->jsonReload($lead_id, $agency_id);
   }
-
-
-  /**
-  * ******************************************************* lead x customer *******************************************************
-  *
-  * output JSON for ingenOverlay: update customer of the lead
-  *
-  * @param lead_id: lead ID encoded -> update lead
-  */
-  public function overlayCustomerMod (Request $request)
-  {
-    $log_src = $this->log_src.'@overlayCustomerMod';
-    $preapp = $request->get('preapp');
-    $agency_id = dec_id($preapp->agency_id);
-
-    $lead_id = dec_id($request->lead_id); // $request->lead_id is encoded
-    $lead = $this->getLead($lead_id, $agency_id);
-    if (!$lead)
-      return log_ajax_err('Lead Not found.', ['src'=>$log_src, 'agency-id'=> $agency_id, 'lead-id'=>$lead_id]);
-      
-    $row_states = get_state_list();
-    
-		$html_output =
-      Form::open(['url'=> route('lead.ajax-customer-update', ['id'=> $request->lead_id]), 'class'=>'frm-update']).
-        view('customers.form')
-          ->with('cust', (object)[
-            'name' => $lead->cust_name, 'tel' => $lead->tel,
-            'tax_id' => $lead->tax_id,
-            'email' => $lead->email,
-            'addr' => $lead->addr, 'addr2' => $lead->addr2,
-            'city' => $lead->city, 'state_id' => $lead->state_id, 'zip' => $lead->zip,
-          ])
-          ->with('data', (object)[
-              'row_states'=> $row_states,
-            ])
-          ->render().'
-                  
-        <div class="btn-group">
-          '.Form::submit('Update Customer').' '.Form::button('Cancel', ['class'=> 'btn-cancel']).'
-        </div>
-
-      '.Form::close().'
-      <script>aoCustomerUpdate()</script>
-		';
-		return json_encode([
-			'success'=>1, 'error'=>0,
-			'html'=> $html_output
-    ]);
-  }
-  /**
-   * Action: update currently selected customer (NOT available in new lead page) => output customer data in JSON.
-   */
-  public function ajaxCustomerUpdate (Request $request)
-  {
-    $log_src = $this->log_src.'@ajaxCustomerUpdate';
-    $preapp = $request->get('preapp');
-    $agency_id = dec_id($preapp->agency_id);
-    $me = Auth::user();
-
-    $lead_id = dec_id($request->lead_id); // $request->lead_id is encoded
-    $lead = $this->getLead($lead_id, $agency_id);
-    if (!$lead)
-      return log_ajax_err('Lead Not found.', ['src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id]);
-    
-
-    // input validation
-    $v = Validator::make($request->all(), [
-      'c_name' => 'required',
-      'tel' => ['required', 'max:10', 'regex:/^\d{10}$/'],
-      'tax_id' => ['nullable', 'regex:/^\d{2}-\d{7}$/'],
-      'email' => 'nullable|email',
-      'state_id' => 'nullable|numeric',
-      'zip' => ['nullable', 'max:10', 'regex:/^\d{5}(-\d{4})?$/'],
-    ], [
-      'c_name.*'=> 'Customer Name is required.',
-      'tel.*'=> 'Please enter the 10 digit Phone Number without dashes and spaces.',
-      'tax_id.*'=> 'Please enter a valid Tax ID number (12-3456789 format).',
-      'email.*'=> 'Please enter a valid Email Address.',
-      'state_id.*'=> 'Invalid State ID entered.',
-      'zip.*'=> 'Please use a valid US Zip code.',
-    ]);
-    if ($v->fails()) {
-      $errs = $v->errors()->all();
-      $msg = '';
-      foreach ($errs as $err)
-        $msg .= '<p>'.$err.'</p>';
-
-		  return json_encode([
-        'success'=>0, 'error'=>1,
-        'msg'=> $msg,
-      ]);
-    }
-
-    $p_tax = ($request->tax_id)?  $request->tax_id : '';
-    $p_email = ($request->email)?  $request->email : '';
-    $p_addr = ($request->addr)?  $request->addr : '';
-    $p_addr2 = ($request->addr2)?  $request->addr2 : '';
-    $p_city = ($request->city)?  $request->city : '';
-    $p_state_id = ($request->state_id)?  $request->state_id : 0;
-    $p_zip = ($request->zip)?  $request->zip : '';
-
-
-    // create logging detail object -> leave lead x log
-    $state = DB::table('states')->find($lead->state_id);
-    $state_code = ($state)?  $state->code : '';
-    $city_state = $lead->city;
-    $city_state .= ($city_state && $state_code)?  ', '.$state_code : $state_code;
-    $old_addr = '<p>'.$lead->addr.'</p><p>'.$lead->addr2.'</p><p>'.trim($city_state.' '.$lead->zip).'</p>';
-
-    $state = DB::table('states')->find($request->state_id);
-    $state_code = ($state)?  $state->code : '';
-    $city_state = $p_city;
-    $city_state .= ($city_state && $state_code)?  ', '.$state_code : $state_code;
-    $new_addr = '<p>'.$p_addr.'</p><p>'.$p_addr2.'</p><p>'.trim($city_state.' '.$p_zip).'</p>';
-
-    $log_detail_values = [
-      (object)['field'=> 'Name', 'old'=> $lead->cust_name, 'new'=> $request->c_name],
-      (object)['field'=> 'Phone', 'old'=> $lead->tel, 'new'=> $request->tel],
-      (object)['field'=> 'Tax ID', 'old'=> $lead->tax_id, 'new'=> $p_tax],
-      (object)['field'=> 'Email', 'old'=> $lead->email, 'new'=> $p_email],
-      (object)['field'=> 'Address', 'old'=> $old_addr, 'new'=> $new_addr],
-    ];
-
-    // update both customer AND lead
-    /*
-    DB::update(
-      " UPDATE customers SET mod_id =?, mod_user =?,
-          name =?, addr =?, addr2 =?, city =?, state_id =?, zip =?,  tel =?, tax_id =?, email =?
-          WHERE id =?
-    ", [$me->id, trim($me->fname.' '.$me->lname),
-      $request->c_name, $p_addr, $p_addr2, $p_city, $p_state_id, $p_zip,  $request->tel, $p_tax, $p_email,
-      $cust_id
-    ]);
-    */
-    DB::update(
-      " UPDATE leads SET mod_id =?, mod_user =?,
-          cust_name =?, addr =?, addr2 =?, city =?, state_id =?, zip =?,  tel =?, tax_id =?, email =?
-          WHERE id =?
-    ", [$me->id, trim($me->fname.' '.$me->lname),
-      $request->c_name, $p_addr, $p_addr2, $p_city, $p_state_id, $p_zip,  $request->tel, $p_tax, $p_email,
-      $lead_id
-    ]);
-    // get customer with updated info
-    // $cust = DB::table('customers')->find($cust_id);
-    
-    // action SUCCESS: leave a log and output JSON
-    $log_id = log_lead_values((object) [
-      'id' => $lead_id, 
-      'msg' => '<p>Customer Information has been updated.</p>',
-      'detail' => $log_detail_values,
-    ]);
-    log_write('Customer Information Updated.', ['src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id, 'log-id'=> $log_id, ]);
-    return $this->jsonReload($lead_id, $agency_id);
-  }
   
   
   
@@ -451,6 +299,8 @@ class LeadController extends Controller
     ", [$lead_id]);
     if (count($db_rows) >0) {
       foreach ($db_rows as $row) {
+        $r_file_count = DB::table('lead_location_files')->whereRaw(" location_id =:loc_id AND lead_id =:lead_id ", [$row->id, $lead_id])->count();
+
         $r_curr = [];
         $accnts_tmp = DB::select(
           " SELECT id, account_id, is_selected, is_project, provider_name AS name, accnt_no, passcode, term, date_contract_end AS date_end, etf, memo
@@ -520,7 +370,7 @@ class LeadController extends Controller
         $r_city_state_zip = format_city_state_zip($row->city, $row->state_code, $row->zip);
         $r_addr .= ($r_addr && $r_city_state_zip)?  ', '.$r_city_state_zip : $r_city_state_zip;
         
-        $row_locations[] = (object)['id'=> $row->id, 'name'=> $row->name, 'addr'=> $r_addr, 'curr_accounts'=> $r_curr, 'quotes'=> $r_quotes];
+        $row_locations[] = (object)['id'=> $row->id, 'name'=> $row->name, 'addr'=> $r_addr, 'file_count'=> $r_file_count, 'curr_accounts'=> $r_curr, 'quotes'=> $r_quotes];
       }
     }
 
@@ -538,19 +388,7 @@ class LeadController extends Controller
   }
 
   /**
-  * ******************************************************* Base/TRAIT functions: also used in extending classes *******************************************************
-  * get Lead object
-  *
-  * @param $lead_id: lead ID
-  * @param $agency_id: agency ID
-  * @return Lead object
-  */
-  public function getLead ($lead_id, $agency_id)
-  {
-    return DB::table('leads AS l')->leftJoin('lead_relation_agency AS la', 'l.id','=','la.lead_id')
-      ->whereRaw(" l.id =? AND la.agency_id =? ", [$lead_id, $agency_id])->first();
-  }
-  /**
+  * ******************************************************* Base functions: used in extending classes/trait *******************************************************
   * output JSON to reload Lead page with updated contents
   *  list of locations, control panel: location navigation, lead summary, followers, customer
   *
@@ -559,7 +397,7 @@ class LeadController extends Controller
   * @param $vars (optional): array of additional output to include in JSON output (by default, empty)
   * @return JSON with HTML outputs
   **/
-  public function jsonReload ($lead_id, $agency_id, $vars = [])
+  private function jsonReload ($lead_id, $agency_id, $vars = [])
   {
     $log_src = $this->log_src.'@jsonReload';
 
@@ -601,6 +439,8 @@ class LeadController extends Controller
       ->with('lead_id', $lead->id)
       ->with('followers', $data->followers)
       ->with('agency_id', $agency_id)
+      ->with('route_name_agent_del', 'lead.ajax-follower-agent-delete')
+      ->with('route_name_prov_del', 'lead.ajax-follower-provider-delete')
       ->render();
 
     if ($data->locations) {
@@ -633,10 +473,131 @@ class LeadController extends Controller
     }
 		return json_encode($arr_output);
   }
-}
+  
 
-trait GetLead {
-  public function getLead ($lead_id, $agency_id) {
-    return parent::getLead($lead_id, $agency_id);
+
+
+  /**
+  * ******************************************************* SHARED functions using trait *******************************************************
+  * **********     lead x customer     **********
+  *
+  * output JSON for ingenOverlay: update customer of the lead
+  *
+  * @param lead_id: lead ID encoded -> update lead
+  */
+  public function overlayCustomerMod (Request $request)
+  {
+    return $this->traitCustomerMod($request, route('lead.ajax-customer-update', ['id'=> $request->lead_id]));
+  }
+
+  /**
+  * Action: update currently selected customer (NOT available in new lead page) => output customer data in JSON.
+  *  use LeadTrait->traitCustomerUpdate()
+  */
+  public function ajaxCustomerUpdate (Request $request)
+  {
+    return $this->traitCustomerUpdate($request);
+  }
+  /**
+  * **********     lead x log     **********
+  *
+  * output JSON for ingenOverlay: new lead x log
+  *  use LeadTrait->traitLogNew()
+  */
+  public function overlayLogNew(Request $request)
+  {
+    return $this->traitLogNew($request, route('lead.ajax-log-add', ['lead_id'=> $request->lead_id]));
+  }
+  /**
+  * output JSON for ingenOverlay: update lead x log message (= mark the log "corrected" and create new log)
+  *  use LeadTrait->traitLogMod()
+  */
+  public function overlayLogMod(Request $request)
+  {
+    return $this->traitLogMod($request, route('lead.ajax-log-correct', ['log_id'=> $request->log_id]));
+  }
+  /**
+  * output JSON for ingenOverlay: show all lead x logs
+  *  use LeadTrait->traitLogHistory()
+  */
+  public function overlayLogHistory(Request $request)
+  {
+    return $this->traitLogHistory($request);
+  }
+  /**
+  * Action: add new log -> output data in JSON.
+  *  use LeadTrait->traitLogAdd()
+  */
+  public function ajaxLogAdd (Request $request)
+  {
+    return $this->traitLogAdd($request);
+  }
+  /**
+  * Action: correct existing log -> mark log as "corrected", and new log -> output data in JSON.
+  *  use LeadTrait->traitLogCorrect()
+  */
+  public function ajaxLogCorrect (Request $request)
+  {
+    return $this->traitLogCorrect($request);
+  }
+
+  /**
+  * **********     lead x follower     **********
+  * output JSON for ingenOverlay: update follower(s) - list of agents + provider-contacts
+  *  use LeadTrait->traitFollowerMod()
+  */
+  public function overlayFollowerMod(Request $request)
+  {
+    return $this->traitFollowerMod($request, route('lead.ajax-follower-update', ['lead_id'=> $request->lead_id]));
+  }
+  /**
+  * Action: update lead x followers (agent and/or provider-contacts) => output data in JSON.
+  *  use LeadTrait->traitFollowerUpdate()
+  */
+  public function ajaxFollowerUpdate (Request $request)
+  {
+    return $this->traitFollowerUpdate($request);
+  }
+  /**
+  * AJAX Action: delete lead x followers (agent) => output data in JSON.
+  *  use LeadTrait->traitFollowerUpdate()
+  */
+  public function ajaxFollowerAgentDelete (Request $request)
+  {
+    return $this->traitFollowerAgentDelete($request);
+  }
+  /**
+  * AJAX Action: delete lead x followers (provider contact) => output data in JSON.
+  *  use LeadTrait->traitFollowerUpdate()
+  */
+  public function ajaxFollowerProviderDelete (Request $request)
+  {
+    return $this->traitFollowerProviderDelete($request);
+  }
+
+  /**
+  * **********     lead x location     **********
+  * output JSON for ingenOverlay: open file attachements
+  *  us LeadTrait->traitOverlayLocationFiles()
+  */
+  public function overlayLocationFiles(Request $request)
+  {
+    return $this->traitOverlayLocationFiles($request, FALSE);
+  }
+  /**
+  * Action: attach uploaded file(s)
+  *  use LeadTrait->traitLocationFileAttach()
+  */
+  public function locationFileAttach(Request $request)
+  {
+    return $this->traitLocationFileAttach($request);
+  }
+  /**
+  * AJAX Action: delete attached file
+  *  use LeadTrait->traitLocationFileDelete()
+  */
+  public function ajaxLocationFileDelete(Request $request)
+  {
+    return $this->traitLocationFileDelete($request);
   }
 }

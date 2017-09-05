@@ -100,7 +100,13 @@ if ($lead->quote_requested)
           </span>
         </div>
       </div>
-      <div class="ctrl-content">
+      <div class="ctrl-content">        
+        @if (count($data->locations) && $lead->project_open)
+        <a href="{{ route('master.project.manage', ['id'=> enc_id($lead->id)]) }}">
+          <button type="button" class="btn-lead-proj">Proceed to Project Management</button>
+        </a>
+        @endif
+
         <h3>store 1st</h3>
         <br>
 
@@ -199,6 +205,8 @@ if ($lead->quote_requested)
         @include('master.leads.sub-follower', [
           'lead_id' => $lead->id,
           'followers' => $data->followers,
+          'route_name_master_del' => 'master.lead.ajax-follower-master-delete',
+          'route_name_prov_del' => 'master.lead.ajax-follower-provider-delete',
         ])
       </div>
     </div> <?php // END: control-panel follower ?>
@@ -332,6 +340,8 @@ window.mLeadManage = function() {
   var $overlayPane = $('#overlay-pane');
   $overlayPane.find('.overlay-inner').append( $('<div/>', {class: 'cal-pane'}) );
   var cal = new ingenCalendar( $overlayPane.find('.cal-pane').get(0) );
+
+  var $sectionLeadControlAccount = $('section.lead-control-account');
   
 
   // local functions
@@ -346,6 +356,26 @@ window.mLeadManage = function() {
     if (max >0)
       $elem.closest('.wrapper-textarea').find('.chr-left').text(elem.value.length + ' / ' + max);
   }
+  /**
+  * @param forward: true if navigating forward, false for backward
+  */
+  var navLocation = function(elem, forward) { 
+    var $navLoc = $(elem).closest('.nav-location');
+    var elemSelect = $navLoc.find('select').get(0);
+    var $selOpts = $navLoc.find('select option');
+      
+    if (forward && $selOpts.length >1 && $selOpts.length -1 > elemSelect.selectedIndex)
+      elemSelect.selectedIndex += 1;
+    else if (!forward && $selOpts.length >1 && elemSelect.selectedIndex > 0)
+      elemSelect.selectedIndex -= 1;
+    else if ($selOpts.length < 1)
+      return false; // cannot navigate forward or backward
+      
+    // scrollTop for location = offset - 120 (<main> element's padding-top = 120)
+    var $locPanel = $('.location[data-id="' + elemSelect.value + '"]');
+    $locPanel.addClass('expanded');
+    $('html, body').animate({scrollTop: $locPanel.offset().top - 120 }, 300);
+  }
 
 
   // local: location
@@ -357,6 +387,13 @@ window.mLeadManage = function() {
     overlay.setTitle('Update Location');
     overlay.openAjax({
       url: laraRoute('master.lead.overlay-loc-mod') + $(this).closest('.location').attr('data-id'),
+      method: 'GET', data: {}
+    });
+  }
+  var fnLocationFile = function() {
+    overlay.setTitle('File Attachments');
+    overlay.openAjax({
+      url: laraRoute('lead.overlay-loc-file') + $(this).closest('.location').attr('data-id'),
       method: 'GET', data: {}
     });
   }
@@ -413,6 +450,13 @@ window.mLeadManage = function() {
       fnSuccess: fnReloadLead,
     });
   }
+  var fnAccountProceed = function() {
+    var frm = $(this).closest('form');
+    confirmUser("Do you want to add the Account to Project Management?",
+      function() {
+        submitFrm(frm);
+      }, "Proceed to Project Management");
+  }
   var fnAccountDel = function() {
     var $containerAccnt = $(this).closest('.account');
     confirmUser("Do you want to delete the account? All associated products with the account will be Deleted and cannot be undone.",
@@ -439,6 +483,13 @@ window.mLeadManage = function() {
       data: {},
       fnSuccess: fnReloadLead,
     });
+  }
+  var fnQuoteSign = function() {
+    var frm = $(this).closest('form');
+    confirmUser("Do you want to mark the Quote as Signed and proceed to Project Management?",
+      function() {
+        submitFrm(frm);
+      }, "Mark Quote Signed");
   }
   var fnQuoteDel = function() {
     var $containerAccnt = $(this).closest('.account');
@@ -546,19 +597,23 @@ window.mLeadManage = function() {
     $sectionLeadControlAccount.find('.btn-log-mod').click(fnLogCorrect);
 
     // reload location, accounts, quotes handlers
-    $('section.lead-frame-content .location .btn-loc-expand').click(fnLocationExpand);
-    $('section.lead-frame-content .location .btn-loc-mod').click(fnLocationMod);
-    $('section.lead-frame-content .location .btn-del-location').click(fnLocationDel);
+    var $sectionLeadContent = $('section.lead-frame-content');
+    $sectionLeadContent.find('.location .btn-loc-expand').click(fnLocationExpand);
+    $sectionLeadContent.find('.location .btn-loc-mod').click(fnLocationMod);
+    $sectionLeadContent.find('.location .btn-loc-file').click(fnLocationFile);
+    $sectionLeadContent.find('.location .btn-del-location').click(fnLocationDel);
 
-    $('section.lead-frame-content .list-account.curr .account .btn-accnt-checker').click(fnAccountCheck);
-    $('section.lead-frame-content .account .btn-accnt-curr-mod').click(function() { fnAccountMod($(this).closest('.account').attr('data-accnt-id')); });
-    $('section.lead-frame-content .location .btn-accnt-curr-del').click(fnAccountDel);
-    $('section.lead-frame-content .location .btn-accnt-curr-add').click(fnAccountNew);
+    $sectionLeadContent.find('.list-account.curr .account .btn-accnt-checker').click(fnAccountCheck);
+    $sectionLeadContent.find('.account .btn-accnt-curr-mod').click(function() { fnAccountMod($(this).closest('.account').attr('data-accnt-id')); });
+    $sectionLeadContent.find('.location .btn-accnt-curr-del').click(fnAccountDel);
+    $sectionLeadContent.find('.location .btn-accnt-curr-add').click(fnAccountNew);
+    $sectionLeadContent.find('.location form.accnt-proceed .btn-accnt-curr-proceed').click(fnAccountProceed);
 
-    $('section.lead-frame-content .list-account.quote .account .btn-accnt-checker').click(fnQuoteCheck);
-    $('section.lead-frame-content .account .btn-quote-mod').click(function() { fnQuoteMod($(this).closest('.account').attr('data-quote-id')); });
-    $('section.lead-frame-content .location .btn-quote-del').click(fnQuoteDel);
-    $('section.lead-frame-content .location .btn-quote-add').click(fnQuoteNew);
+    $sectionLeadContent.find('.list-account.quote .account .btn-accnt-checker').click(fnQuoteCheck);
+    $sectionLeadContent.find('.account .btn-quote-mod').click(function() { fnQuoteMod($(this).closest('.account').attr('data-quote-id')); });
+    $sectionLeadContent.find('.location .btn-quote-del').click(fnQuoteDel);
+    $sectionLeadContent.find('.location .btn-quote-add').click(fnQuoteNew);
+    $sectionLeadContent.find('.location form.quote-sign .btn-quote-sign').click(fnQuoteSign);
   };
   /**
   * @param json: {
@@ -647,6 +702,74 @@ window.mLeadManage = function() {
       });
     });
   }
+  // location-file-attach/delete
+  window.moLocationFiles = function() {
+    var $frmFile = $('#overlay-pane .frm-file');
+    $frmFile.find('input[type=file]').change(function () {
+      var $wrapper = $(this).closest('.file-wrapper');
+      var $preview = $wrapper.find('.preview');
+      
+      var clearFile = function(msg) {
+        if (msg != undefined && msg !='')
+          alertUser(msg);
+
+        $frmFile.get(0).reset();
+        $wrapper.find('label.file-label').addClass('empty');
+        $preview.html("");
+        return false;
+      };
+      
+      if (this.files.length >0) {
+        // validate: file size must be greater than 0 byte, 10 MB limit
+        var size_limit = 10; // MB
+        var total_size = parseInt( $('#overlay-pane .lead-loc-list-files').attr('data-size') );
+        total_size = (total_size >0)?  total_size : 0;
+
+        // validate: valid image types
+        for (var i=0; i<this.files.length; i++) {
+          var f = this.files[i];
+          
+          if (f.size <= 0)
+            return clearFile('File size must be greater than 0 byte.');
+
+          total_size += f.size;
+          if (total_size > size_limit  *1048576)
+            return clearFile("Total File size is limited to " + size_limit + " MB.");
+        }
+        // add preview of uploaded files
+        $wrapper.find('label.file-label').removeClass('empty');
+
+        var previewHTML = '';
+        for (var i=0; i<this.files.length; i++)
+          previewHTML += '<p>' + this.files[i].name + '</p>';
+        $preview.hide().html(previewHTML).fadeIn();
+      } else
+        return clearFile();
+    });
+    $frmFile.submit(function(e) {
+      e.preventDefault();
+      if ($(this).find('input[type=file]').get(0).files.length <1) {
+        alertUser("Please select at least 1 file to upload.");
+      } else
+        submitFrm(this);
+    });
+    $('#overlay-pane .lead-loc-list-files .btn-del-file').click(function() {
+      var $frm = $(this).closest('form');
+
+      confirmUser("<p>Do you want to Delete the attached File?</p>",
+        function() {
+          reqAjax({
+            url: $frm.prop('action'), data: $frm.serializeArray(),
+            fnSuccess: function(json) {
+              fnReloadLead(json);
+              toastUser('Attached File has been removed.');
+              $frm.fadeOut({ complete: function() { $(this).closest('li').remove(); }});
+            },
+          });
+        }, "Delete Attached File");
+    });
+  } // END moLocationFiles()
+
   // current-accont-create
   window.moAccountNew = function() {
     var $elemDateEnd = $overlayPane.find('.frm-add .cal-date-end');
@@ -1000,7 +1123,7 @@ window.mLeadManage = function() {
   }
   // END: window.(function name)
 
-  var $sectionLeadControlAccount = $('section.lead-control-account');
+
 
   // ***** control panel: location navigation *****
   $sectionLeadControlAccount.find('.btn-ctrl-expand').click(function() { $(this).closest('.panel').toggleClass('expanded') });
@@ -1014,26 +1137,6 @@ window.mLeadManage = function() {
     $locPanel.addClass('expanded');
     $('html, body').animate({scrollTop: $locPanel.offset().top - 120 }, 300);
   });
-  /**
-  * @param forward: true if navigating forward, false for backward
-  */
-  var navLocation = function(elem, forward) { 
-    var $navLoc = $(elem).closest('.nav-location');
-    var elemSelect = $navLoc.find('select').get(0);
-    var $selOpts = $navLoc.find('select option');
-      
-    if (forward && $selOpts.length >1 && $selOpts.length -1 > elemSelect.selectedIndex)
-      elemSelect.selectedIndex += 1;
-    else if (!forward && $selOpts.length >1 && elemSelect.selectedIndex > 0)
-      elemSelect.selectedIndex -= 1;
-    else if ($selOpts.length < 1)
-      return false; // cannot navigate forward or backward
-      
-    // scrollTop for location = offset - 120 (<main> element's padding-top = 120)
-    var $locPanel = $('.location[data-id="' + elemSelect.value + '"]');
-    $locPanel.addClass('expanded');
-    $('html, body').animate({scrollTop: $locPanel.offset().top - 120 }, 300);
-  }
   $sectionLeadControlAccount.find('.nav-location .btn-prev-location').click(function() { navLocation(this, false); });
   $sectionLeadControlAccount.find('.nav-location .btn-next-location').click(function() { navLocation(this, true); });
 

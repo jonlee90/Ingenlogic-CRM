@@ -47,6 +47,7 @@ define ("DEFAULT_TIMEZONE", "America/Los_Angeles");
 define ("DEFAULT_DATE", '1979-12-31');
 define ("PAGING_PG_COUNT", 10);
 define ("LIMIT_IMG_BYTE", 5242880); // uploaded img size limit to 5 MB = 5 x 1024 x 1024 = 5242880 bytes
+define ("LIMIT_LOCATION_FILE_SIZE_MB", 10); // max size of all uploaded files is limit to 10 MB = 10 x 1024 x 1024 = 10485760 bytes
 
 // ***** login session will expire after 1 hr = 60x60 = 3600 sec *****
 // define ("LOGIN_EXPIRE_SEC", 10800); // testing - set to 3 hrs (10800sec) instead

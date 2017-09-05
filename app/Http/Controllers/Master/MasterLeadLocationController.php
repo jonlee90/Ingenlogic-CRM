@@ -15,9 +15,9 @@ use Validator;
 
 class MasterLeadLocationController extends MasterLeadController
 {
-  /*
-   * custom variable
-   */
+  /**
+  * custom variable
+  */
   private $log_src = 'MasterLeadLocationController';
 
 
@@ -831,6 +831,76 @@ class MasterLeadLocationController extends MasterLeadController
       'locId'=> enc_id($loc_id),
     ]);
   }
+  
+
+  /**
+  * Action: mark account as project -> redirect to project-management page
+  *
+  * @param accnt_id: account ID encoded
+  */
+  public function accountProceed (Request $request)
+  {
+    $log_src = $this->log_src.'@accountProceed';
+    $preapp = $request->get('preapp');
+    $me = Auth::user();
+    $manager_id = $preapp->manager_id;
+
+    // validate: account -> location -> lead exists
+    $accnt_id = dec_id($request->accnt_id);
+    $accnt = DB::table('lead_current_accounts')->find($accnt_id);
+    if (!$accnt)
+      return log_ajax_err('Account Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'account-id'=> $accnt_id]);
+
+    $loc_id = $accnt->location_id;
+    $loc = DB::table('lead_locations')->find($loc_id);
+    if (!$loc)
+      return log_ajax_err('Location Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'location-id'=> $loc_id, 'account-id'=> $accnt_id]);
+
+    $lead_id = $loc->lead_id;
+    $lead = $this->getLead($lead_id, $manager_id);
+    if (!$lead)
+      return log_ajax_err('Lead Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'account-id'=> $accnt_id]);
+      
+
+    // reset any updated products
+    DB::table('lead_current_updated_products')->where('account_id',$accnt_id)->delete();
+    
+    // if proceeded account is to be-kept, reset and create updated-products
+    if ($accnt->is_selected) {
+      $products = DB::table('lead_current_products')->where('account_id', $accnt_id)->get();
+      if ($products) {
+        $n = count($products);
+        $db_insert_params = [];
+        for ($i =0; $i < $n; $i++) {
+          $prod = $products[$i];
+          $db_insert_params[] = [
+            'account_id'=> $accnt_id, 'order_no'=> ($i +1),
+            'svc_name' => $prod->svc_name,
+            'prod_name' => $prod->prod_name,
+            'price' => $prod->price, 'qty' => $prod->qty,
+          ];
+        }
+        DB::table('lead_current_updated_products')->insert($db_insert_params);
+      }
+    }
+    DB::table('lead_current_accounts')->where('id', $accnt_id)->update([
+      'mod_id'=> $me->id, 'mod_user'=> trim($me->fname.' '.$me->lname),
+      'is_project'=> DB::raw(1),
+      'date_portout'=> NULL, 'date_cancel'=> NULL, 
+    ]);
+      
+    
+    // action SUCCESS: leave a log and output JSON
+    $log_id = log_lead_values((object) [
+      'id' => $lead_id, 
+      'msg' => '<p>Current Account has been added to Project Management.</p><p>[Location] '.$loc->name.' x [Account] '.$accnt->provider_name.'</p>'
+    ]);
+    log_write('Current Account added to Project Management.', [
+      'src'=> $log_src, 'manager-id'=> $manager_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'account-id'=> $accnt_id,
+      'account-selected'=> $accnt->is_selected, 'log-id'=> $log_id,
+    ]);
+    return msg_redirect('Current Account has been added to Project Management.', route('master.project.manage', ['lead_id'=> enc_id($lead_id),]));
+  }
 
 
   /**
@@ -1534,6 +1604,63 @@ class MasterLeadLocationController extends MasterLeadController
     ]);
     log_write('Lead x Location x Quote Deleted.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'quote-id'=> $quote_id]);
     return $this->jsonReload($lead_id, $manager_id, ['locId'=> enc_id($loc_id)]);
+  }
+  
+
+  /**
+  * Action: mark quote as signed (is_project) -> redirect to project-management page
+  *
+  * @param quote_id: quote ID encoded
+  */
+  public function quoteSign (Request $request)
+  {
+    $log_src = $this->log_src.'@quoteSign';
+    $preapp = $request->get('preapp');
+    $me = Auth::user();
+    $manager_id = $preapp->manager_id;
+
+    // validate: quote -> location -> lead exists
+    $quote_id = dec_id($request->quote_id);
+    $quote = DB::table('lead_quotes')->find($quote_id);
+    if (!$quote)
+      return log_ajax_err('Quote Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'quote-id'=> $quote_id]);
+
+    $loc_id = $quote->location_id;
+    $loc = DB::table('lead_locations')->find($loc_id);
+    if (!$loc)
+      return log_ajax_err('Location Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'location-id'=> $loc_id, 'quote-id'=> $quote_id]);
+
+    $lead_id = $loc->lead_id;
+    $lead = $this->getLead($lead_id, $manager_id);
+    if (!$lead)
+      return log_ajax_err('Lead Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'quote-id'=> $quote_id]);
+
+    // get provider name for lead-logging
+    $prov = Provider::find($quote->provider_id);
+    if (!$prov)
+      return log_ajax_err('Provider Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'quote-id'=> $quote_id]);
+      
+
+    DB::table('lead_quotes')->where('id', $quote_id)->update([
+      'mod_id'=> $me->id, 'mod_user'=> trim($me->fname.' '.$me->lname),
+      'is_project'=> DB::raw(1),
+      'date_signed'=> date('Y-m-d'),
+      'date_inspect'=> NULL, 'inspect_done'=> DB::raw(0),
+      'date_construct'=> NULL, 'construct_done'=> DB::raw(0),
+      'date_install'=> NULL, 'install_done'=> DB::raw(0),
+      'date_portin'=> NULL, 'portin_done'=> DB::raw(0),
+    ]);
+      
+    
+    // action SUCCESS: leave a log and output JSON
+    $log_id = log_lead_values((object) [
+      'id' => $lead_id, 
+      'msg' => '<p>Quote has been signed and added to Project Management.</p><p>[Location] '.$loc->name.' x [Quote Provider] '.$prov->name.'</p>'
+    ]);
+    log_write('Quote signed and added to Project Management.', [
+      'src'=> $log_src, 'manager-id'=> $manager_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'quote-id'=> $quote_id, 'log-id'=> $log_id,
+    ]);
+    return msg_redirect('Quote has been signed and added to Project Management.', route('master.project.manage', ['lead_id'=> enc_id($lead_id),]));
   }
 
 

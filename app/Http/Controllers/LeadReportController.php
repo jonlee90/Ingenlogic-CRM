@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\LeadController;
 
 use App\Provider;
 use Collective\Html\FormFacade as Form;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Validator;
 
-class LeadReportController extends Controller
+class LeadReportController extends LeadController
 {
   /*
    * custom variable
@@ -27,14 +28,13 @@ class LeadReportController extends Controller
   public function current (Request $request)
   {
     $log_src = $this->log_src.'@current';
-
     $preapp = $request->get('preapp');
-    $agent_id = dec_id($preapp->agent_id);
+    $agency_id = dec_id($preapp->agency_id);
 
     $lead_id = dec_id($request->id);
-    $lead = DB::table('leads')->whereRaw(" id =:id AND agent_id =:agent_id ", [$lead_id, $agent_id])->first();
+    $lead = $this->getLead($lead_id, $agency_id);
     if (!$lead)
-      return log_redirect('Lead Not found.', ['src'=> $log_src, 'agent-id'=> $agent_id, 'lead-id'=> $lead_id]);
+      return log_redirect('Lead Not found.', ['src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id]);
 
 
     $row_locations = [];
@@ -94,12 +94,12 @@ class LeadReportController extends Controller
     $log_src = $this->log_src.'@quote';
 
     $preapp = $request->get('preapp');
-    $agent_id = dec_id($preapp->agent_id);
+    $agency_id = dec_id($preapp->agency_id);
 
     $lead_id = dec_id($request->id);
-    $lead = DB::table('leads')->whereRaw(" id =:id AND agent_id =:agent_id ", [$lead_id, $agent_id])->first();
+    $lead = $this->getLead($lead_id, $agency_id);
     if (!$lead)
-      return log_redirect('Lead Not found.', ['src'=> $log_src, 'agent-id'=> $agent_id, 'lead-id'=> $lead_id]);
+      return log_redirect('Lead Not found.', ['src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id]);
 
 
     $row_locations = [];
@@ -132,7 +132,6 @@ class LeadReportController extends Controller
         }
         $quotes_tmp = DB::select(
           " SELECT q.id, q.provider_id, q.term, q.date_contract_end AS date_end,
-                q.spiff_rate, q.spiff_ratio_agency, q.residual_rate, q.residual_ratio_agency,
                 p.name AS name,
                 0 AS is_curr
               FROM lead_quotes q LEFT JOIN providers p ON q.provider_id =p.id
@@ -144,7 +143,7 @@ class LeadReportController extends Controller
           foreach ($quotes_tmp as $quote) {
             // MRC products
             $quote_mrc_prods = DB::select(
-              " SELECT p.memo, p.price, p.qty, p.spiff_rate, p.residual_rate,
+              " SELECT p.memo, p.price, p.qty,
                     IF(pp.id >0 AND s.id >0 AND pp.provider_id =:prov_id ,1,0) AS valid,
                     IF(pp.id >0, pp.p_name, p.prod_name) AS prod_name,
                     IF(s.id >0, s.name, p.svc_name) AS svc_name,

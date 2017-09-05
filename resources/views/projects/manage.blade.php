@@ -6,11 +6,8 @@
 
 @section('content')
 <section class="lead-control-general">
-<?php
-$progress_stat = 'Project Opened';
-?>
-  @include('projects.sub-progress-bar', [
-    'progress_stat' => $progress_stat,
+  @include('leads.sub-progress-bar', [
+    'progress_stat' => 'Project Opened',
     'progress_index' => 2,
   ])
 </section>
@@ -20,14 +17,6 @@ $progress_stat = 'Project Opened';
     <div class="panel expanded">
       <div class="ctrl-header">
         Location Navigation
-        <?php /*
-        <div class="ctrl-actions">
-          <span class="popup-base">
-            <i class="md btn-ctrl-expand">expand_more</i>
-            <div class="popup-tip right"><div>Toggle Panel</div></div>
-          </span>
-        </div>
-        */ ?>
       </div>
       <div class="ctrl-content">
         <div class="nav-location">
@@ -48,16 +37,10 @@ $progress_stat = 'Project Opened';
             <div class="popup-tip"><div>Next Location</div></div>
           </span>
         </div>
-        <?php /* ****** collapse and expand all ******
-        <div>
-          <i class="md">layers</i>
-          <i class="md">layers_clear</i>
-        </div>
-        */ ?>
       </div>
     </div> <?php // END: control-panel location ?>
 
-    <div class="panel">
+    <div class="panel expanded">
       <div class="ctrl-header">
         Lead Summary
         <div class="ctrl-actions">
@@ -69,95 +52,8 @@ $progress_stat = 'Project Opened';
       </div>
       <div class="ctrl-content">
         <div>
-          <a href="{{ route('lead.rpt.current', ['id'=>enc_id($lead->id)]) }}"><button type="button" class="btn-report-current">Current Summary Report</button></a>
-          <a href="{{ route('lead.rpt.quote', ['id'=>enc_id($lead->id)]) }}"><button type="button" class="btn-report-quote">Quote Summary Report</button></a>
-          <button type="button" class="btn-lead-reload">Reload Page</button>
           <a href="{{ route('lead.manage', ['id'=> enc_id($lead->id)]) }}"><button type="button" class="btn-lead-proj">Return to Lead Management</button></a>
         </div>
-
-        @if (!$lead->quote_requested && count($data->locations) >0)            
-        {!! Form::open(['url'=> route('master.lead.request-quote', ['id'=> enc_id($lead->id)]), ]) !!}
-          {!! Form::submit('Request Quote') !!}
-        {!! Form::close() !!}
-        @endif
-
-        <h3>store 1st</h3>
-        <br>
-
-        <p><b>Current MRC</b> <span class="float-r">$ 79.97</span></p>
-        <p><b>New MRC</b> <span class="float-r">$ 20.00</span></p>
-        <p><b>Monthly Saving</b> <span class="float-r">$ 59.97</span></p>
-        <p><b>ETF</b> <span class="float-r">$ 1,200.00</span></p>
-        <p><b>New NRC</b> <span class="float-r">$ 0.00</span></p>
-        <p><b>One-Time Setup Fee</b> <span class="float-r">$ 1,200.00</span></p>
-        <br>
-
-        <table>
-          <thead>
-            <tr> <th>Provider</th> <th>MRC</th> <th>NRC</th> </tr>
-          </thead>
-          <tbody>
-            <tr> <td>Broadvoice <i class="md s float-r secondary">done</i></td> <td>$ 0.00</td> <td>$ 0.00</td> </tr>
-            <tr class="grayed"> <td>Service not in List</td> <td>$ 79.97</td> <td>$ 0.00</td> </tr>
-          </tbody>
-          <tbody>
-            <tr> <td>Spectrum VoIP <i class="md s float-r secondary">done</i></td> <td>$ 20.00</td> <td>$ 0.00</td> </tr>
-            <tr class="grayed"> <td>Broadview</td> <td>$ 4650.00</td> <td>$ 450.00</td> </tr>
-            <tr class="grayed"> <td>AT&T</td> <td>$ 0.00</td> <td>$ 0.00</td> </tr>
-          </tbody>
-          <tfoot>
-            <tr> <th>Total</th> <th>$ 20.00</th> <th>$ 0.00</th> </tr>
-          </tfoot>
-        </table>
-        <div class="spacer-h"></div>
-        
-        <h3>store 3</h3>
-        <table>
-          <thead>
-            <tr> <th>Provider</th> <th>MRC</th> <th>NRC</th> </tr>
-          </thead>
-          <tbody>
-            <tr> <td colspan="3" class="err">Please add account(s)</td> </tr>
-          </tbody>
-          <tbody>
-          </tbody>
-          <tfoot>
-            <tr> <th>Total</th> <th>$ 20.00</th> <th>$ 0.00</th> </tr>
-          </tfoot>
-        </table>
-        <div class="spacer-h"></div>
-        
-        <h3>store 5th</h3>
-        <table>
-          <thead>
-            <tr> <th>Provider</th> <th>MRC</th> <th>NRC</th> </tr>
-          </thead>
-          <tbody>
-            <tr> <td colspan="3" class="err">Please add account(s)</td> </tr>
-          </tbody>
-          <tbody>
-          </tbody>
-          <tfoot>
-            <tr> <th>Total</th> <th>$ 20.00</th> <th>$ 0.00</th> </tr>
-          </tfoot>
-        </table>
-        <div class="spacer-h"></div>
-        
-        <h3>new loc</h3>
-        <table>
-          <thead>
-            <tr> <th>Provider</th> <th>MRC</th> <th>NRC</th> </tr>
-          </thead>
-          <tbody>
-            <tr> <td>Net 2 Phone <i class="md s float-r secondary">done</i></td> <td>$ 0.00</td> <td>$ 0.00</td> </tr>
-          </tbody>
-          <tbody>
-            <tr> <td>Broadvoice <i class="md s float-r secondary">done</i></td> <td>$ 0.00</td> <td>$ 0.00</td> </tr>
-          </tbody>
-          <tfoot>
-            <tr> <th>Total</th> <th>$ 0.00</th> <th>$ 0.00</th> </tr>
-          </tfoot>
-        </table>
       </div>
     </div> <?php // END: control-panel summary ?>
 
@@ -179,6 +75,8 @@ $progress_stat = 'Project Opened';
         @include('leads.sub-follower', [
           'lead_id' => $lead->id,
           'followers' => $data->followers,
+          'route_name_agent_del' => 'project.ajax-follower-agent-delete',
+          'route_name_prov_del' => 'project.ajax-follower-provider-delete',
           'agency_id' => dec_id($preapp->agency_id),
         ])
       </div>
@@ -264,7 +162,7 @@ $progress_stat = 'Project Opened';
     @include('projects.sub-location', [
       'locations' => $data->locations,
       'open_first' => TRUE,
-      'quote_requested' => $lead->quote_requested,
+      'is_master' => FALSE,
     ])
   </div>
 </section>
@@ -328,27 +226,73 @@ window.aProjectManage = function() {
     $(this).closest('.location').toggleClass('expanded');
     resizeControlPanel();
   }
+  var fnLocationFile = function() {
+    overlay.setTitle('File Attachments');
+    overlay.openAjax({
+      url: laraRoute('project.overlay-loc-file') + $(this).closest('.location').attr('data-id'),
+      method: 'GET', data: {}
+    });
+  }
   
-  var fnAccountMod = function() {
+  var fnKeepMod = function() {
     overlay.setTitle('Update Account Products');
     overlay.openAjax({
-      url: laraRoute('lead.overlay-accnt-mod') + $(this).closest('.account').attr('data-accnt-id'),
+      url: laraRoute('project.overlay-keep-prod') + $(this).closest('.account').attr('data-accnt-id'),
       method: 'GET', data: {}
     });
   };
-  var fnAccountDel = function() {
-    var $containerAccnt = $(this).closest('.account');
-    confirmUser("Do you want to delete the account? All associated products with the account will be Deleted and cannot be undone.",
+  var fnCancelMod = function() {
+    overlay.setTitle('Update Dates');
+    overlay.openAjax({
+      url: laraRoute('project.overlay-cancel-date') + $(this).closest('.account').attr('data-accnt-id'),
+      method: 'GET', data: {}
+    });
+  };
+  var fnSignedMod = function() {
+    overlay.setTitle('Update Dates');
+    overlay.openAjax({
+      url: laraRoute('project.overlay-sign-date') + $(this).closest('.account').attr('data-quote-id'),
+      method: 'GET', data: {}
+    });
+  };
+  var fnSignedToggleProd = function() {
+    $(this).nextAll('.tbl-accnt-prods').toggleClass('expand');
+  };
+
+  var fnKeepRevert = function() {
+    var frm = $(this).closest('form');
+    confirmUser("<p>Do you want to revert and remove the account from the Project Management?</p><p>All updated products will be Deleted and cannot be undone.</p>",
       function() {
-        reqAjax({
-          url: laraRoute('lead.ajax-accnt-delete') + $containerAccnt.attr('data-accnt-id'),
-          data: {_method: 'DELETE'},
-          fnSuccess: function(json) {
-            fnReloadLead(json);
-            toastUser('Current Account has been deleted.');
-          }
-        });
-      }, "Delete Account");
+        submitFrm(frm);
+      }, "Revert Account");
+  }
+  var fnCancelRevert = function() {
+    var frm = $(this).closest('form');
+    confirmUser("<p>Do you want to revert and remove the account from the Project Management?</p><p>All dates will be reset.</p>",
+      function() {
+        submitFrm(frm);
+      }, "Revert Account");
+  }
+  var fnSignedRevert = function() {
+    var frm = $(this).closest('form');
+    confirmUser("<p>Do you want to revert the signed account and remove from the Project Management?</p>All dates will be reset.</p>",
+      function() {
+        submitFrm(frm);
+      }, "Revert Account");
+  }
+  var fnAccountComplete = function() {
+    var frm = $(this).closest('form');
+    confirmUser("<p>Do you want to mark the Account Complete?</p>",
+      function() {
+        submitFrm(frm);
+      }, "Account Complete");
+  }
+  var fnAccountUndoComplete = function() {
+    var frm = $(this).closest('form');
+    confirmUser("<p>Do you want to undo the Account Completion?</p>",
+      function() {
+        submitFrm(frm);
+      }, "Undo Account Completion");
   }
   
 
@@ -368,7 +312,7 @@ window.aProjectManage = function() {
   var fnLogCorrect = function() {
     overlay.setTitle('Log Correction');
     overlay.openAjax({
-      url: laraRoute('lead.overlay-log-mod') + $(this).closest('.log-action').attr('data-id'),
+      url: laraRoute('project.overlay-log-mod') + $(this).closest('.log-action').attr('data-id'),
       method: 'GET', data: {}
     });
   }
@@ -377,10 +321,21 @@ window.aProjectManage = function() {
     $sectionLeadControlAccount.find('.btn-log-mod').click(fnLogCorrect);
 
     // reload location, accounts handlers
-    $('section.lead-frame-content .location .btn-loc-expand').click(fnLocationExpand);
+    var $sectionLeadContent = $('section.lead-frame-content');
+    $sectionLeadContent.find('.location .btn-loc-expand').click(fnLocationExpand);
+    $sectionLeadContent.find('.location .btn-loc-file').click(fnLocationFile);
 
-    $('section.lead-frame-content .account .btn-accnt-curr-mod').click(fnAccountMod);
-    $('section.lead-frame-content .location .btn-accnt-curr-del').click(fnAccountDel);
+    $sectionLeadContent.find('.account .btn-accnt-keep-mod').click(fnKeepMod);
+    $sectionLeadContent.find('.account .btn-accnt-cancel-date').click(fnCancelMod);
+    $sectionLeadContent.find('.account .btn-accnt-sign-date').click(fnSignedMod);
+    $sectionLeadContent.find('.account .btn-accnt-sign-toggle').click(fnSignedToggleProd);
+
+    $sectionLeadContent.find('.location .btn-accnt-keep-revert').click(fnKeepRevert);
+    $sectionLeadContent.find('.location .btn-accnt-cancel-revert').click(fnCancelRevert);
+    $sectionLeadContent.find('.location .btn-accnt-sign-revert').click(fnSignedRevert);
+
+    $sectionLeadContent.find('.btn-accnt-complete').click(fnAccountComplete);
+    $sectionLeadContent.find('.btn-undo-complete').click(fnAccountUndoComplete);
   };
   /**
   * @param json: {
@@ -388,6 +343,12 @@ window.aProjectManage = function() {
   * }
   */
   var fnReloadLead = function(json) {
+    // if reloaded content has no location, redirect back to lead-management
+    if (json.noLocation == 1) {
+      window.location = json.leadManageUrl;
+      return false;
+    }
+
     var $locSelect = $sectionLeadControlAccount.find('.nav-location select');
 
     $sectionLeadControlAccount.find('#selected-customer').html('').html(json.custHTML);
@@ -430,63 +391,88 @@ window.aProjectManage = function() {
         fnSuccess: function(json) {
           fnReloadLead(json);
           overlay.close();
-          toastUser('The Lead Customer has been updated with the New Customer.');
+          toastUser('The Lead Customer has been updated.');
         },
       });
     });
   }
+
+  // location-file-attach/delete
+  window.moLocationFiles = function() {
+    var $frmFile = $('#overlay-pane .frm-file');
+    $frmFile.find('input[type=file]').change(function () {
+      var $wrapper = $(this).closest('.file-wrapper');
+      var $preview = $wrapper.find('.preview');
+      
+      var clearFile = function(msg) {
+        if (msg != undefined && msg !='')
+          alertUser(msg);
+
+        $frmFile.get(0).reset();
+        $wrapper.find('label.file-label').addClass('empty');
+        $preview.html("");
+        return false;
+      };
+      
+      if (this.files.length >0) {
+        // validate: file size must be greater than 0 byte, 10 MB limit
+        var size_limit = 10; // MB
+        var total_size = parseInt( $('#overlay-pane .lead-loc-list-files').attr('data-size') );
+        total_size = (total_size >0)?  total_size : 0;
+
+        // validate: valid image types
+        for (var i=0; i<this.files.length; i++) {
+          var f = this.files[i];
+          
+          if (f.size <= 0)
+            return clearFile('File size must be greater than 0 byte.');
+
+          total_size += f.size;
+          if (total_size > size_limit  *1048576)
+            return clearFile("Total File size is limited to " + size_limit + " MB.");
+        }
+        // add preview of uploaded files
+        $wrapper.find('label.file-label').removeClass('empty');
+
+        var previewHTML = '';
+        for (var i=0; i<this.files.length; i++)
+          previewHTML += '<p>' + this.files[i].name + '</p>';
+        $preview.hide().html(previewHTML).fadeIn();
+      } else
+        return clearFile();
+    });
+    $frmFile.submit(function(e) {
+      e.preventDefault();
+      if ($(this).find('input[type=file]').get(0).files.length <1) {
+        alertUser("Please select at least 1 file to upload.");
+      } else
+        submitFrm(this);
+    });
+    $('#overlay-pane .lead-loc-list-files .btn-del-file').click(function() {
+      var $frm = $(this).closest('form');
+
+      confirmUser("<p>Do you want to Delete the attached File?</p>",
+        function() {
+          reqAjax({
+            url: $frm.prop('action'), data: $frm.serializeArray(),
+            fnSuccess: function(json) {
+              fnReloadLead(json);
+              toastUser('Attached File has been removed.');
+              $frm.fadeOut({ complete: function() { $(this).closest('li').remove(); }});
+            },
+          });
+        }, "Delete Attached File");
+    });
+  } // END moLocationFiles()
   
-  // current-accont-create
-  window.aoCurrentNew = function() {
-    var $elemDateEnd = $overlayPane.find('.frm-add .cal-date-end');
-    $elemDateEnd.on('focus click', function() {
-      cal.clickDraw(this);
-    });
-    $overlayPane.find('.wrapper-textarea textarea').on('input blur', function() { updateTextareaChr(this); });
-
-    $overlayPane.find('.frm-add').submit(function(e) {
-      e.preventDefault();
-      var $frm = $(this);
-      reqAjax({
-        url: $frm.prop('action'),
-        data: $frm.serializeArray(),
-        fnSuccess: function(json) {
-          fnReloadLead(json);
-          fnAccountMod(json.accntId);
-          $overlayPane.find('.overlay-container-change-wrapper .container-change').removeClass('accnt').addClass('mrc');
-          toastUser('Current Account has been added to the Lead.');
-        },
-      });
-    });
-  }
-  // current-accont-update: provider, monthly rate
-  window.aoCurrentUpdate = function() {
-    // provider section
-    $overlayPane.find('.frm-accnt .cal-date-end').on('focus click', function() {
-      cal.clickDraw(this);
-    });
-    $overlayPane.find('.wrapper-textarea textarea').on('input blur', function() { updateTextareaChr(this); });
-
-    $overlayPane.find('.frm-accnt').submit(function(e) {
-      e.preventDefault();
-      var $frm = $(this);
-
-      reqAjax({
-        url: $frm.prop('action'),
-        data: $frm.serializeArray(),
-        fnSuccess: function(json) {
-          fnReloadLead(json);
-          overlay.close();
-          toastUser('Current Account has been updated.');
-        },
-      });
-    });
+  // keep-account-prod-update: monthly rate
+  window.aoKeepProdUpdate = function() {
     // product section
     $overlayPane.find('.btn-del-prod').click(function() {
       $(this).closest('tr').fadeOut({duration: 200, complete: function() { 
         $(this).remove();
-        if ($overlayPane.find('.tbl-lead-prod-list.mrc tbody tr').length <= 0)
-          $overlayPane.find('form.frm-mrc input[type=submit]').prop('disabled', true);
+        if ($overlayPane.find('.tbl-lead-prod-list tbody tr').length <= 0)
+          $overlayPane.find('form.frm-prod input[type=submit]').prop('disabled', true);
       }});
     });
     $overlayPane.find('input[name="price[]"], input[name="qty[]"]').on('input blur', function() {
@@ -497,12 +483,12 @@ window.aProjectManage = function() {
       $tr.find('.subtotal').text(subtotal);
     });
     $overlayPane.find('.btn-prod-add').click(function() {
-      $overlayPane.find('.tbl-lead-prod-list.mrc tbody').append(
+      $overlayPane.find('.tbl-lead-prod-list tbody').append(
         $overlayPane.find('.tbl-lead-row-src tr:first').clone(true)
       );
-      $overlayPane.find('form.frm-mrc input[type=submit]').prop('disabled', false);
+      $overlayPane.find('form.frm-prod input[type=submit]').prop('disabled', false);
     });
-    $overlayPane.find('.frm-mrc').submit(function(e) {
+    $overlayPane.find('.frm-prod').submit(function(e) {
       e.preventDefault();
 
       var $frm = $(this);
@@ -517,7 +503,33 @@ window.aProjectManage = function() {
         fnSuccess: function(json) {
           fnReloadLead(json);
           overlay.close();
-          toastUser('Current Account Products have been updated.');
+          toastUser('Account Products have been updated.');
+        },
+      });
+    });
+  }
+  // cancel-account/signed-account-date-update
+  window.aoDateUpdate = function() {
+    $overlayPane.find('.cal-date-input').on('focus click', function() {
+      cal.clickDraw(this);
+    });
+    $overlayPane.find('.frm-update').submit(function(e) {
+      e.preventDefault();
+      
+      var $frm = $(this);
+
+      // check if form has signed-date -> required field
+      $inputDateSign = $frm.find('input[name=sign_date]');
+      if ($inputDateSign.length >0 && $inputDateSign.val() == '')
+        return alertUser('Date Signed is a required field.');
+        
+      reqAjax({
+        url: $frm.prop('action'),
+        data: $frm.serializeArray(),
+        fnSuccess: function(json) {
+          fnReloadLead(json);
+          overlay.close();
+          toastUser('Account Dates have been updated.');
         },
       });
     });
@@ -661,7 +673,7 @@ window.aProjectManage = function() {
     );
     // by default open 'update provider'
     reqAjax({
-      url: laraRoute('lead.overlay-follower-mod') + encLeadId,
+      url: laraRoute('project.overlay-follower-mod') + encLeadId,
       method: 'GET', data: {},
       fnSuccess: fnFillContainerChange,
       fnFail: function(json) { alertUser(json.msg); overlay.close(); },
@@ -672,14 +684,14 @@ window.aProjectManage = function() {
   // ***** control panel: customer  *****
   $('.btn-customer-mod').click(function() {
     overlay.setTitle('Update Customer');
-    overlay.openAjax({ url: laraRoute('lead.overlay-customer-mod') + encLeadId, method: 'GET', data: {} });
+    overlay.openAjax({ url: laraRoute('project.overlay-customer-mod') + encLeadId, method: 'GET', data: {} });
   });
   
   // ***** control panel: lead-logs *****
   $sectionLeadControlAccount.find('.btn-log-add').click(function() {
     overlay.setTitle('Leave a Log');
     overlay.openAjax({
-      url: laraRoute('lead.overlay-log-new') + encLeadId,
+      url: laraRoute('project.overlay-log-new') + encLeadId,
       method: 'GET', data: {}
     });
   });
@@ -687,7 +699,7 @@ window.aProjectManage = function() {
   $sectionLeadControlAccount.find('.btn-log-history').click(function() {
     overlay.setTitle('Log History');
     overlay.openAjax({
-      url: laraRoute('lead.overlay-log-history') + encLeadId,
+      url: laraRoute('project.overlay-log-history') + encLeadId,
       method: 'GET', data: {}
     });
   });

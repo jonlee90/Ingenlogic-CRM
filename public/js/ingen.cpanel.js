@@ -419,6 +419,8 @@ function reqAjax(json) {
  * @param drawCallbackFn (optional): additional script to run
  * ***************************************************** */
 function openDataTable(tblSelector, srcUrl, addData, drawCallbackFn) {
+  var $loadingOverlay;
+  
   $(tblSelector).DataTable({
     serverSide: true,
     pageLength: 30,
@@ -430,30 +432,30 @@ function openDataTable(tblSelector, srcUrl, addData, drawCallbackFn) {
       type: "GET",
       data: addData,
       error: function() {
-        var $loadingOverlay = $('.form-submit-loading');
-        $loadingOverlay.fadeOut({complete: function() { $loadingOverlay.remove(); }});
-        
+        $('.form-submit-loading').fadeOut({complete: function() { $(this).remove(); }});
         alertUser('The system was unable to load the table.');
       }
     },
 		dom: '<tp>',
 
     preDrawCallback: function(settings) {
-      var $loadingOverlay = $('<div/>', {class: 'form-submit-loading'}).hide();
-      $('body').append($loadingOverlay);
-      $loadingOverlay.fadeIn();
+      if ( !$('body').has('.form-submit-loading').length ) {
+        $loadingOverlay = $('<div/>', {class: 'form-submit-loading'}).hide();
+        $('body').append($loadingOverlay);
+        $loadingOverlay.fadeIn();
+      }
     },
     drawCallback: function(settings) {
-      var $loadingOverlay = $('.form-submit-loading');
-      $loadingOverlay.fadeOut({complete: function() { $loadingOverlay.remove(); }});
-      
+      if ($loadingOverlay)
+        $loadingOverlay.fadeOut({complete: function() { $(this).remove(); }});
       $(this).closest('.dataTables_wrapper').find('.dataTables_paginate').toggle(this.api().page.info().pages > 1);
       
-      // execute additional scripts to run (if exists)
-      if (drawCallbackFn != undefined)
-        drawCallbackFn();
     }
-	});
+  });
+  
+  // execute additional scripts to run (if exists)
+  if (drawCallbackFn != undefined)
+    drawCallbackFn();
 }
 /** ********************************************************
  * scrollToTop
@@ -483,34 +485,50 @@ function laraRoute(routeName) {
   switch (routeName) {
     case 'datatables.leads':
       return '/datatables/leads';
+    case 'datatables.projects-sign':
+      return '/datatables/projects/signed';
+    case 'datatables.projects-keep':
+      return '/datatables/projects/keep';
+    case 'datatables.projects-cancel':
+      return '/datatables/projects/cancel';
       
     case 'master.provider.overlay-prod-new':
       return '/provider/json/product/new/'; // + provider-id
     case 'master.provider.overlay-prod-mod':
       return '/provider/json/product/mod/'; // + product-id
-      case 'master.lead.overlay-commission':
-        return '/lead/json/commission/'; // + lead-id
+    case 'master.lead.overlay-commission':
+      return '/lead/json/commission/'; // + lead-id
     case 'master.lead.overlay-agency-assign':
       return '/lead/json/agency/assign/'; // + lead-id
-      case 'master.lead.overlay-manager-assign':
-        return '/lead/json/manager/assign/'; // + lead-id
+    case 'master.lead.overlay-manager-assign':
+      return '/lead/json/manager/assign/'; // + lead-id
+    case 'master.project.overlay-commission':
+      return '/project/json/commission/'; // + lead-id
+    case 'master.project.overlay-agency-assign':
+      return '/project/json/agency/assign/'; // + lead-id
+    case 'master.project.overlay-manager-assign':
+      return '/project/json/manager/assign/'; // + lead-id
       
+    /* */
     case 'lead.overlay-customer-list':
       return '/lead/json/customers';
     case 'lead.overlay-customer-new':
       return '/lead/json/customer/new';
+    /* */
     case 'master.lead.overlay-customer-mod':
     case 'lead.overlay-customer-mod':
       return '/lead/json/customer/mod/'; // + lead-id
+    /* */
     case 'lead.overlay-salesperson-list':
       return '/lead/json/salespersons';
     case 'lead.overlay-salesperson-new':
       return '/lead/json/salesperson/new';
     case 'lead.overlay-salesperson-mod':
       return '/lead/json/salesperson/mod/'; // + lead-id
+    /* */
     case 'master.lead.overlay-follower-mod':
     case 'lead.overlay-follower-mod':
-      return '/lead/json/follower/mod/';
+      return '/lead/json/follower/mod/'; // + lead-id
     case 'master.lead.overlay-log-new':
     case 'lead.overlay-log-new':
       return '/lead/json/log/new/'; // + lead-id
@@ -527,6 +545,8 @@ function laraRoute(routeName) {
     case 'master.lead.overlay-loc-mod':
     case 'lead.overlay-loc-mod':
       return '/lead/json/location/mod/'; // + location-id
+    case 'lead.overlay-loc-file':
+      return '/lead/json/location/file/'; // + location-id
     case 'master.lead.overlay-accnt-new':
     case 'lead.overlay-accnt-new':
       return '/lead/json/account/new/'; // + location-id
@@ -541,6 +561,31 @@ function laraRoute(routeName) {
     case 'master.lead.overlay-quote-mod':
     case 'lead.overlay-quote-mod':
       return '/lead/json/quote/mod/'; // + quote-id
+      
+    case 'master.project.overlay-customer-mod':
+    case 'project.overlay-customer-mod':
+      return '/project/json/customer/mod/'; // + lead-id
+    case 'master.project.overlay-follower-mod':
+    case 'project.overlay-follower-mod':
+      return '/project/json/follower/mod/'; // + lead-id
+    case 'master.project.overlay-log-new':
+    case 'project.overlay-log-new':
+      return '/project/json/log/new/'; // + lead-id
+    case 'master.project.overlay-log-mod':
+    case 'project.overlay-log-mod':
+      return '/project/json/log/mod/'; // + log-id
+    case 'master.project.overlay-log-history':
+    case 'project.overlay-log-history':
+      return '/project/json/log/history/'; // + lead-id
+      
+    case 'project.overlay-loc-file':
+      return '/project/json/location/file/'; // + location-id
+    case 'project.overlay-keep-prod':
+      return '/project/json/keep/product/'; // + account-id
+    case 'project.overlay-cancel-date':
+      return '/project/json/cancel/date/'; // + account-id
+    case 'project.overlay-sign-date':
+      return '/project/json/signed/date/'; // + quote-id
       
     case 'master.lead.ajax-reload':
     case 'lead.ajax-reload':

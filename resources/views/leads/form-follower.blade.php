@@ -2,6 +2,7 @@
 /**
 * required vars
 * @param $lead_id: lead ID
+* @param $frm_url: URL to submit form
 * @param $agents: available users (agent)
 * @param $prov_contacts: available provider contacts
 * @param $agent_followers: currently saved lead x agent-follower objects
@@ -66,7 +67,7 @@ $row_prod_options = [];
 
   <?php // ******************************* Monthly Recurring products table form ******************************* ?>
 
-  {!! Form::open(['url'=> route('lead.ajax-follower-update', ['lead_id'=> enc_id($lead_id)]), 'class'=>'frm-follower']) !!}
+  {!! Form::open(['url'=> $frm_url, 'class'=>'frm-follower']) !!}
     <h3>List of Followers</h3>
 
     <table class="tbl-lead-follower-list">

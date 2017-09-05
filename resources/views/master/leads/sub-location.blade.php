@@ -29,6 +29,13 @@ $iteration_quote = 1;
             <div class="popup-tip"><div>Update Location</div></div>
           </span>
           <span class="popup-base">
+            <i class="md md-btn btn-loc-file">attach_file</i>
+            @if ($loc->file_count)
+            <div class="lead-loc-file-count">{{ $loc->file_count }}</div>
+            @endif
+            <div class="popup-tip"><div>Attached Files</div></div>
+          </span>
+          <span class="popup-base">
             <i class="md md-btn btn-del-location">close</i>
             <div class="popup-tip right"><div>Delete Location</div></div>
           </span>
@@ -52,6 +59,8 @@ $iteration_quote = 1;
         ?>
         <div class="account {{ $accnt_class }}" data-accnt-id="{{ enc_id($accnt->id) }}">
           <div class="accnt-info">
+          
+            @unless ($accnt->is_project)
             <span class="wrapper-checker popup-base">
               <i class="md btn-accnt-checker"></i>
               <div class="popup-tip"><div></div></div>
@@ -65,7 +74,21 @@ $iteration_quote = 1;
                 <i class="md btn-accnt-curr-del">close</i>
                 <div class="popup-tip"><div>Remove Account</div></div>
               </span>
+              {!! Form::open(['url'=> route('master.lead.accnt-proceed', ['id'=> enc_id($accnt->id)]), 'class'=> 'inline accnt-proceed', ]) !!}
+                <span class="popup-base">
+                  <i class="md btn-accnt-curr-proceed">done</i>
+                  <div class="popup-tip right"><div>Add to to Project Management</div></div>
+                </span>
+              {!! Form::close() !!}
             </div>
+
+            @else
+            <span class="wrapper-checker">
+              <i class="md"></i>
+            </span>
+
+            @endunless
+
             <b class="prov-name">{{ $iteration_accnt++ }}. {{ $accnt->name }}
               @if($accnt->memo)
               <span class="popup-base">
@@ -130,6 +153,10 @@ $iteration_quote = 1;
               </tr>
             </tfoot>
           </table>
+
+          @if ($accnt->is_project)
+          <div class="project-overlay"></div>
+          @endif
         </div>
         @empty
         @endforelse
@@ -154,6 +181,8 @@ $iteration_quote = 1;
         ?>
         <div class="account {{ $quote_class }}" data-quote-id="{{ enc_id($quote->id) }}">
           <div class="accnt-info">
+            
+            @unless ($quote->is_project)
             <span class="wrapper-checker popup-base">
               <i class="md btn-accnt-checker"></i>
               <div class="popup-tip"><div></div></div>
@@ -167,7 +196,23 @@ $iteration_quote = 1;
                 <i class="md btn-quote-del">close</i>
                 <div class="popup-tip"><div>Remove Account</div></div>
               </span>
+
+              @if ($quote->is_selected)
+              {!! Form::open(['url'=> route('master.lead.quote-sign', ['id'=> enc_id($quote->id)]), 'class'=> 'inline quote-sign', ]) !!}
+                <span class="popup-base">
+                  <i class="md btn-quote-sign">done</i>
+                  <div class="popup-tip right"><div>Mark Quote Signed</div></div>
+                </span>
+              {!! Form::close() !!}
+              @endif
             </div>
+            
+            @else
+            <span class="wrapper-checker">
+              <i class="md"></i>
+            </span>
+
+            @endif
             <b class="prov-name">{{ $iteration_quote++ }}. {{ $quote->name }}</b>
             <div class="info-detail">
               <p><label>Terms</label> {{ ($quote->term >1)? $quote->term.' month' : 'Month to Month' }}</p>
@@ -254,6 +299,10 @@ $iteration_quote = 1;
               </tr>
             </tfoot>
           </table>
+
+          @if ($quote->is_project)
+          <div class="project-overlay"></div>
+          @endif
         </div>
         @empty
         @endforelse

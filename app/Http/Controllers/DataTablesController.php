@@ -367,7 +367,7 @@ class DataTablesController extends Controller
             LEFT JOIN leads l ON la.lead_id =l.id
               LEFT JOIN lead_locations ll ON l.id = ll.lead_id
                 LEFT JOIN lead_current_accounts lc ON ll.id =lc.location_id AND lc.is_project >0
-                LEFT JOIN lead_current_accounts lq ON ll.id =lq.location_id AND lq.is_project >0
+                LEFT JOIN lead_quotes lq ON ll.id =lq.location_id AND lq.is_project >0
           WHERE la.agency_id =:id AND l.id >0
             GROUP BY l.id
           ORDER BY l.quote_requested DESC, l.id DESC
@@ -387,6 +387,8 @@ class DataTablesController extends Controller
           $r_status = 'Open';
 
         $r_cell_act = '<a href="'.route('lead.manage',['id'=> $r_enc_id]).'"><i title="Manage Lead" class="md s btn-mod-item">edit</i></a>';
+        if ($row->is_project)
+          $r_cell_act .= '<a href="'.route('project.manage',['id'=> $r_enc_id]).'"><i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i></a>';
         /*
         <th></th>
         <th>Status</th>

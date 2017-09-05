@@ -4,6 +4,8 @@
 * @param $lead_id: lead ID (not encoded)
 * @param $agency_id: agency ID (not encoded)
 * @param $followers: array of follower objects -> [masters, agents, prov_contacts]
+* @param $route_name_agent_del: route name to submit form (delete agent-follower)
+* @param $route_name_prov_del: route name to submit form (delete provider-follower)
 */
 ?>
 @if (count($followers->masters) ==0 && count($followers->agents) ==0 && count($followers->prov_contacts) ==0)
@@ -63,7 +65,7 @@
 
       <div class="follower-actions">
         @if (!$follower->valid || $follower->agency_id == $agency_id)
-        {!! Form::open(['url'=> route('lead.ajax-follower-agent-delete', ['lead_id'=> enc_id($lead_id), 'order_no'=> enc_id($follower->order_no)]) ]) !!}
+        {!! Form::open(['url'=> route($route_name_agent_del, ['lead_id'=> enc_id($lead_id), 'order_no'=> enc_id($follower->order_no)]), ]) !!}
 
         <span class="popup-base">{!! $emailHTML !!}</span>
         <span class="popup-base">{!! $telHTML !!}</span>
@@ -109,7 +111,7 @@
     <div>
       <span class="follower-tag">{{ $follower->prov }}</span>
       <div class="follower-actions">
-        {!! Form::open(['url'=> route('lead.ajax-follower-provider-delete', ['lead_id'=> enc_id($lead_id), 'order_no'=> enc_id($follower->order_no)]) ]) !!}
+        {!! Form::open(['url'=> route($route_name_prov_del, ['lead_id'=> enc_id($lead_id), 'order_no'=> enc_id($follower->order_no)]), ]) !!}
 
         <span class="popup-base">{!! $emailHTML !!}</span>
         <span class="popup-base">{!! $telHTML !!}</span>

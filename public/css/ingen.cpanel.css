@@ -267,17 +267,8 @@ input[type=radio].radio-label-src ~ .radio-label-wrapper label.radio-label-btn:h
   text-align: center;
 }
 .file-wrapper label.empty:not(:hover) { background: #eee; border-color: #999; color: #333; } 
-.file-wrapper label .empty-msg { display: inline-block; margin: 5px auto 10px; }
-.file-wrapper label .preview { font-size: 0; }
-.file-wrapper label .preview .preview-text { margin-top: 5px; font-size: 0.75rem; }
-.file-wrapper label .preview img { 
-  max-width: 100%; max-height: 150px;
-  border: 1px solid #95b2b6;
-  padding: 5px; background: #fff;
-}
-.file-wrapper label .preview .preview-frame { display: inline-block; width: calc(25% - 4px); height: 60px; margin: 3px 2px; border: 1px solid #95b2b6; padding: 5px; background: #fff; }
-.file-wrapper label .preview .preview-frame img { max-height: 100%; border: 0; padding: 0; background: none; }
-    
+.file-wrapper label .preview { margin: 5px auto 10px; }
+
 .input-group .wrapper-input { display: inline-table; }
 .wrapper-input { width: 300px; margin-bottom: 5px; border: 1px solid #aaa; border-radius: 2px; }
 .wrapper-input .row { display: table-row; width: 100%; border-collapse: collapse; }
@@ -397,7 +388,7 @@ header .header-icon-menu a:first-child { margin-left: 0; }
 header .header-icon-menu a:last-child { margin-right: 0; }
 header .header-icon-menu .btn-header-menu { display: none; }
 header .header-icon-menu .popup-tip { margin-top: 2px; }
-header .header-icon-menu .popup-tip div { left: initial; right: -50px; text-align: center; transform: none; }
+header .header-icon-menu .btn-header-profile .popup-tip div { left: initial; right: -50px; text-align: center; transform: none; }
 
 .nav-mm {
   position: fixed; z-index: 1; top: 50px; /* height of header */ left: 0;
@@ -878,7 +869,7 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
 .wrapper.lead-management main { z-index: 0; padding-top: 110px; }
 .wrapper.lead-management header { box-shadow: none; }
 .wrapper.lead-management .lead-control-general {
-  position: fixed; z-index: 1; top: 50px; left: 50px;
+  position: fixed; z-index: 100; top: 50px; left: 50px;
   width: calc(100% - 50px); height: 32px;
   padding: 1px 10px 1px 0; background: #333; /* #2276d2; */ color: #f7f7f7;
   box-shadow: 0 3px 10px rgba(0,0,0, 0.3);
@@ -963,7 +954,7 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
  .wrapper.lead-management .lead-control-account ul.follower-list .follower-title { display: inline-block; padding-right: 10px; white-space: nowrap; }
 
  /* .wrapper.lead-management .lead-control-account .ctrl-logs .lead-log-history | #overlay-pane .lead-log-history */
-.lead-log-history li + li::before { content: ""; display: block; width: 80%; height: 1px; margin: 10px auto 20px; border-top: 1px solid #ccc; }
+.lead-log-history > ul > li + li::before { content: ""; display: block; width: 80%; height: 1px; margin: 10px auto 20px; border-top: 1px solid #ccc; }
 .lead-log-history .log-action { float: right; }
 .lead-log-history .log-action .popup-tip div { left: initial; right: 0; transform: none; }
 .lead-log-history .log-msg { padding: 5px 0 0 10px; }
@@ -1005,6 +996,7 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
 .lead-log-history .log-detail tr.new td,
  .lead-log-history .log-detail tr.changed td.new { background: #cfc; }
 .lead-log-history .log-detail > :not(:first-child) { margin-top: 5px; }
+.lead-log-history .log-detail ul.lead-log-files { margin-left: 20px; list-style: square; }
 
 @media screen and (min-width: 701px) {
   #overlay-pane .lead-log-history {
@@ -1045,7 +1037,7 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
 .wrapper.lead-management .location > h2:hover,
   .wrapper.lead-management .location.expanded > h2:hover { background: #0054b0; }
 .wrapper.lead-management .location > h2 .float-r { height: 36px; }
-.wrapper.lead-management .location .btn-loc-expand { transition: all 0.3s; }
+.wrapper.lead-management .location .btn-loc-expand { z-index: 2; transition: all 0.3s; }
 .wrapper.lead-management .location .btn-loc-expand .md { float: right; font-size: 36px; transition: transform 0.3s; }
 .wrapper.lead-management .location .btn-loc-expand .popup-tip { margin-top: 32px; }
 .wrapper.lead-management .location .loc-content { padding: 10px 0; border: 1px solid #ccc; border-top: 0; background: #fff; }
@@ -1053,6 +1045,13 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
 .wrapper.lead-management .location .loc-preview ~ * { display: none; }
 .wrapper.lead-management .location .loc-preview .addr { float: left; }
 .wrapper.lead-management .location .loc-preview .btns { float: right; }
+.wrapper.lead-management .location .loc-preview .btns .popup-base { display: inline-block; }
+.wrapper.lead-management .location .loc-preview .btns .lead-loc-file-count {
+  position: absolute; z-index: 1; top: -7px; right: -7px;
+  min-width: 16px; height: 16px; border-radius: 8px; padding: 3px;
+  background: #f53d3d;
+  line-height: 10px; color: #fff; text-align: center; font-size: 10px;
+}
 .wrapper.lead-management .location.expanded > h2 { background: #2276d2; }
 .wrapper.lead-management .location.expanded .loc-preview ~ * { display: block; }
 .wrapper.lead-management .location.expanded .btn-loc-expand .md { transform: rotate(180deg); }
@@ -1107,7 +1106,7 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'liga';
 }
-.wrapper.lead-management .location .account .tbl-accnt-prods { border-width: 1px; }
+.wrapper.lead-management .location .account .tbl-accnt-prods { border-width: 1px; border-top: 0; }
 .wrapper.lead-management .location .account .tbl-accnt-prods thead th { border-width: 0 1px 1px; }
 .wrapper.lead-management .location .account .tbl-accnt-prods thead th:nth-child(1),
  .wrapper.lead-management .location .account .tbl-accnt-prods thead th:nth-child(2) { width: 200px; }
@@ -1143,15 +1142,18 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
 .wrapper.lead-management .location .account.checked .btn-accnt-checker ~ .popup-tip > div::before { content: 'Remove from Report'; }
 .wrapper.lead-management .location .account.checked .tbl-accnt-prods tfoot .cell-mrc,
  .wrapper.lead-management .location .account.checked .tbl-accnt-prods tfoot .cell-nrc { color: #000; }
-.wrapper.lead-management .location .account .project-overlay { position: absolute;  top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0, 0.5); }
-.wrapper.lead-management .location .account .project-overlay::before {
-  content: 'under project management';
-  position: absolute; top: 50%; left: 50%;
-  padding: 10px 50px; border: 2px solid #f53d3d; border-radius: 10px; background: #fff;
-  color: #f53d3d; font-weight: bold; text-transform: uppercase; white-space: nowrap;  
-  transform: translate(-50%, -50%) rotate(0deg);
+.wrapper.lead-management .location .account .project-overlay,
+ .wrapper.lead-management .location .account .complete-overlay { position: absolute;  top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0, 0.5); }
+.wrapper.lead-management .location .account .project-overlay::before,
+ .wrapper.lead-management .location .account .complete-overlay::before {
+  position: absolute; top: -10px; right: 10px;
+  border: 2px solid #f53d3d; border-radius: 10px; background: #fff;
+  color: #f53d3d; font-weight: bold; text-transform: uppercase; white-space: nowrap;
   box-shadow: 0 5px 10px rgba(0,0,0, 0.3);
 }
+.wrapper.lead-management .location .account .project-overlay::before { content: 'under project management'; padding: 10px 50px; }
+.wrapper.lead-management .location .account .complete-overlay::before { content: 'account complete'; padding: 10px 60px 10px 40px; }
+.wrapper.lead-management .location .account .complete-overlay .popup-base { position: absolute; top: -2px; right: 20px; }
 
 .overlay-inner .wrapper-textarea.lead-curr-accnt-textarea,
  .overlay-inner .wrapper-textarea.lead-log-textarea { width: 500px; max-width: calc(100% - 160px); height: 100px; }
@@ -1204,20 +1206,30 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
 .overlay-lead-product .tbl-lead-prod-list.mrc, .overlay-lead-product .tbl-lead-prod-list.nrc { margin-top: 10px; }
 .overlay-lead-product .tbl-lead-row-src { display: none; }
 
+.overlay-lead-loc-file h3 { margin-bottom: 10px; }
+.overlay-lead-loc-file .lead-loc-list-files { margin-top: 10px; }
+
 
 /*** project management ***/
 .wrapper.lead-management .location .list-account.keep .accnt-info,
  .wrapper.lead-management .location .list-account.cancel .accnt-info,
  .wrapper.lead-management .location .list-account.signed .accnt-info { padding-left: 20px; }
 .wrapper.lead-management .location .list-account .account .accnt-dates { border: 1px solid #ccc; border-top: 0; padding: 15px 20px; }
-.wrapper.lead-management .location .list-account .account .tbl-accnt-dates { border-width: 1px; }
-.wrapper.lead-management .location .list-account .account .tbl-accnt-dates th { width: 20%; border-width: 1px; }
+.wrapper.lead-management .location .list-account .account .tbl-accnt-dates { border-width: 1px; border-top: 0; }
+.wrapper.lead-management .location .list-account .account .tbl-accnt-dates thead th { width: 20%; border-width: 1px; border-top: 0; }
 .wrapper.lead-management .location .list-account .account .tbl-accnt-dates td { background: none !important; }
 .wrapper.lead-management .location .list-account .account .tbl-accnt-dates td.cell-input { min-width: 120px; padding: 0; }
 .wrapper.lead-management .location .list-account .account .tbl-accnt-dates td.cell-input input { min-width: auto; width: calc(100% - 30px); border: 0; }
 .wrapper.lead-management .location .list-account .account .tbl-accnt-dates td.cell-input label:last-child {
   float: right; width: 30px; padding: 5px 0; border-left: 1px solid #ccc; background: #eee; text-align: center;
 }
+.wrapper.lead-management .location .list-account.signed .btn-accnt-sign-toggle {
+    height: 15px; border-bottom: 1px solid #bbb; background: #555; text-align: center;
+}
+.wrapper.lead-management .location .list-account.signed .btn-accnt-sign-toggle .md { vertical-align: top; line-height: 15px; color: #fff; transition: color 0.2s; }
+.wrapper.lead-management .location .list-account.signed .btn-accnt-sign-toggle:hover .md { color: #333; }
+.wrapper.lead-management .location .list-account.signed .btn-accnt-sign-toggle + .tbl-accnt-prods { display: none; }
+.wrapper.lead-management .location .list-account.signed .btn-accnt-sign-toggle + .tbl-accnt-prods.expand { display: table; }
 
 
 

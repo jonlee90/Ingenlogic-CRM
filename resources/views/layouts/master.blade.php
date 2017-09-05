@@ -55,7 +55,7 @@
       
       @if (Auth::check())
       <div class="header-icon-menu">
-        <a href="{{ route('master.user.mod', [enc_id(Auth::id())]) }}" class="popup-base" title="My Account">
+        <a href="{{ route('master.user.mod', [enc_id(Auth::id())]) }}" class="btn-header-profile popup-base">
           <i class="md md-18">person</i>
           <div class="popup-tip">
             <div>
@@ -64,7 +64,10 @@
             </div>
           </div>
         </a>
-        <a href="{{ route('logout') }}" title="Log Out" class="btn-header-logout"><span class="fa-power-off"></span></a>
+        <a href="{{ route('logout') }}" class="btn-header-logout popup-base">
+          <span class="fa-power-off"></span>
+          <div class="popup-tip right"><div>Log Off</div></div>
+        </a>
         <a class="btn-header-menu"><span class="fa-bars"></span></a>
       </div>
     @endif
@@ -76,6 +79,7 @@
       <li><a href="{{ route('home') }}"><i class="md">home</i>Home</a></li>
       <li><a href="{{ route('master.user.list') }}"><i class="md">account_circle</i>Users</a></li>
       <li><a href="{{ route('lead.list') }}"><i class="md">device_hub</i>Leads</a></li>
+      <li><a href="{{ route('project.list') }}"><i class="md">assignment_turned_in</i>Projects</a></li>
       <li><a href="{{ route('master.provider.list') }}"><i class="md">build</i>Service Providers</a></li>
       <li><a href="{{ route('master.agency.list') }}"><i class="md">domain</i>Agencies</a></li>
       <li><a><i class="md">settings</i>Settings</a>

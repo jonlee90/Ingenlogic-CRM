@@ -455,6 +455,9 @@ class MasterDataTablesController extends Controller
               LEFT JOIN agencies a ON la.agency_id =a.id
               LEFT JOIN relation_agency_manager am ON la.agency_id =am.agency_id
                 LEFT JOIN login_users u2 ON am.user_id =u2.id
+            LEFT JOIN lead_locations ll ON l.id = ll.lead_id
+              LEFT JOIN lead_current_accounts lc ON ll.id =lc.location_id AND lc.is_project >0
+              LEFT JOIN lead_current_accounts lq ON ll.id =lq.location_id AND lq.is_project >0
           WHERE u1.id =:manager_id1 OR (a.id >0 AND u2.id =:manager_id2)
             GROUP BY l.id ";
 
@@ -462,7 +465,9 @@ class MasterDataTablesController extends Controller
       $row_count = count($db_rows);
       
       $db_rows_paginated = DB::select(
-        " SELECT l.id, l.cust_name, l.tel, l.email, l.quote_requested,  a.name AS agency, SUM(IF(a.id >0, 1,0)) n_agency
+        " SELECT l.id, l.cust_name, l.tel, l.email, l.quote_requested,  a.name AS agency,
+              SUM(IF(a.id >0, 1,0)) n_agency,
+              IF(lc.id >0 OR lq.id >0, 1,0) is_project
             $query_part
             ORDER BY l.quote_requested DESC, l.id DESC
               LIMIT :skip, :take
@@ -473,12 +478,17 @@ class MasterDataTablesController extends Controller
       $row_count = DB::table('leads')->count();
 
       $db_rows_paginated = DB::select(
-        " SELECT l.id, l.cust_name, l.tel, l.email, l.quote_requested,  a.name AS agency, SUM(IF(a.id >0, 1,0)) n_agency
+        " SELECT l.id, l.cust_name, l.tel, l.email, l.quote_requested,
+              a.name AS agency, SUM(IF(a.id >0, 1,0)) n_agency,
+              IF(lc.id >0 OR lq.id >0, 1,0) is_project
             FROM leads l
-            LEFT JOIN lead_relation_agency la ON l.id =la.lead_id
-              LEFT JOIN agencies a ON la.agency_id =a.id
+              LEFT JOIN lead_relation_agency la ON l.id =la.lead_id
+                LEFT JOIN agencies a ON la.agency_id =a.id
+              LEFT JOIN lead_locations ll ON l.id = ll.lead_id
+                LEFT JOIN lead_current_accounts lc ON ll.id =lc.location_id AND lc.is_project >0
+                LEFT JOIN lead_quotes lq ON ll.id =lq.location_id AND lq.is_project >0
             GROUP BY l.id
-            ORDER BY l.quote_requested DESC, l.id DESC
+            ORDER BY is_project DESC, l.quote_requested DESC, l.id DESC
               LIMIT :skip, :take
       ", [$request->start, $request->length, ]);
     }
@@ -487,7 +497,14 @@ class MasterDataTablesController extends Controller
     if ($db_rows_paginated) {
       foreach ($db_rows_paginated as $row) {
         $r_enc_id = enc_id($row->id);
-        $r_status = ($row->quote_requested >0)?  'Quote Requested' : 'Open';
+        
+        if ($row->is_project)
+          $r_status = 'Project Management';
+        elseif ($row->quote_requested)
+          $r_status = 'Quote Requested';
+        else
+          $r_status = 'Open';
+
         if ($row->n_agency >1)
           $r_agency = '(Multiple Agencies)';
         elseif ($row->n_agency >0 && $row->agency)
@@ -495,11 +512,9 @@ class MasterDataTablesController extends Controller
         else
           $r_agency = '(Not Assigned)';
 
-        $r_cell_act = 
-          Form::open(['url'=> route('lead.delete', ['id'=> $r_enc_id]), 'method'=>'DELETE']).'
-            <a href="'.route('master.lead.manage',['id'=> $r_enc_id]).'"><i title="Manage Lead" class="md s btn-mod-item">edit</i></a>
-            <i title="Delete Lead" class="md s btn-close-item">close</i>
-          '.Form::close();
+        $r_cell_act = '<a href="'.route('master.lead.manage',['id'=> $r_enc_id]).'"><i title="Lead Management" class="md s btn-mod-item">edit</i></a>';
+        if ($row->is_project)
+          $r_cell_act .= '<a href="'.route('master.project.manage',['id'=> $r_enc_id]).'"><i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i></a>';
         /*
         <th></th>
         <th>Agency</th>
@@ -526,5 +541,316 @@ class MasterDataTablesController extends Controller
       "data": '.json_encode($row_items).'
 		}';
 		return $json_output;
+  }
+
+  /**
+  * output JSON for DataTables: list of accounts (signed) in project-management ()
+  */
+  public function projectsSigned (Request $request)
+  {
+    $preapp = $request->get('preapp');
+    $me = Auth::user();
+
+    $query_select =
+    " SELECT q.*, ll.addr, l.id AS lead_id, l.cust_name, l.city, s.code AS state_code, l.zip, l.tel,  a.name AS agency,
+        SUM(IF(a.id >0, 1,0)) n_agency ";
+
+    if (POS_LV_CH_USER <= $me->access_lv && $me->access_lv <= POS_LV_CH_MANAGER) {
+      $manager_id = $preapp->manager_id;
+      $query_part =
+        " FROM lead_quotes q
+            LEFT JOIN lead_locations ll ON q.location_id =ll.id
+              LEFT JOIN leads l ON ll.lead_id =l.id
+                LEFT JOIN lead_relation_manager lm ON l.id =lm.lead_id
+                  LEFT JOIN login_users u1 ON lm.user_id =u1.id
+                LEFT JOIN lead_relation_agency la ON l.id =la.lead_id
+                  LEFT JOIN agencies a ON la.agency_id =a.id
+                  LEFT JOIN relation_agency_manager am ON la.agency_id =am.agency_id
+                    LEFT JOIN login_users u2 ON am.user_id =u2.id
+                LEFT JOIN states s ON l.state_id =s.id
+          WHERE q.is_project >0 AND (u1.id =:manager_id1 OR (a.id >0 AND u2.id =:manager_id2))
+            GROUP BY q.id ";
+
+      $db_rows = DB::select(" SELECT q.id  $query_part ", [$manager_id, $manager_id]);
+      $row_count = count($db_rows);
+      
+      $db_rows_paginated = DB::select(
+        " $query_select
+            $query_part
+            ORDER BY q.is_complete DESC, ll.name, l.id DESC, q.id DESC
+              LIMIT :skip, :take
+      ", [$manager_id, $manager_id, $request->start, $request->length, ]);
+
+    } else {
+      // master-agents have access to any accounts
+      $row_count = DB::table('lead_quotes')->where('is_project', DB::raw(1))->count();
+
+      $db_rows_paginated = DB::select(
+        " $query_select
+            FROM lead_quotes q
+              LEFT JOIN lead_locations ll ON q.location_id =ll.id
+                LEFT JOIN leads l ON ll.lead_id =l.id
+                  LEFT JOIN lead_relation_agency la ON l.id =la.lead_id
+                    LEFT JOIN agencies a ON la.agency_id =a.id
+                  LEFT JOIN states s ON l.state_id =s.id
+            WHERE q.is_project >0
+              GROUP BY q.id
+            ORDER BY q.is_complete DESC, ll.name, l.id DESC, q.id DESC
+              LIMIT :skip, :take
+      ", [$request->start, $request->length, ]);
+    }
+    
+    $row_items = [];
+    if ($db_rows_paginated) {
+      foreach ($db_rows_paginated as $row) {
+        $r_enc_id = enc_id($row->id);
+        
+        if ($row->is_complete)
+          $r_status = 'Project Completed';
+        else
+          $r_status = 'In Progress';
+
+        if ($row->n_agency >1)
+          $r_agency = '(Multiple Agencies)';
+        elseif ($row->n_agency >0 && $row->agency)
+          $r_agency = $row->agency;
+        else
+          $r_agency = '(Not Assigned)';
+
+        $r_cell_act = '<a href="'.route('master.project.manage',['id'=> $r_enc_id]).'"><i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i></a>';
+        /*
+        <th></th>
+        <th>Agency</th>
+        <th>Status</th>
+        <th>Customer</th>
+        <th>Phone</th>
+        <th>Address</th>
+        */
+        $row_items[] = [
+          $r_cell_act,
+          $r_status,
+          $r_agency,
+          '<strong><a href="'.route('master.project.manage',['id'=> $r_enc_id]).'">'.$row->cust_name.'</a></strong>',
+          format_tel($row->tel),
+          format_city_state_zip($row->city, $row->state_code, $row->zip),
+        ];
+      } // END foreach: $db_rows_paginated
+    }
+
+    $json_output ='{
+      "draw": '.$request->draw.',
+      "recordsTotal": '.$row_count.',
+      "recordsFiltered": '.$row_count.',
+      "data": '.json_encode($row_items).'
+    }';
+    return $json_output;
+  }
+  /**
+  * output JSON for DataTables: list of accounts (kept, updated) in project-management ()
+  */
+  public function projectsKeep (Request $request)
+  {
+    $preapp = $request->get('preapp');
+    $me = Auth::user();
+
+    $query_select =
+      " SELECT ca.*, ll.addr, l.id AS lead_id, l.cust_name, l.city, s.code AS state_code, l.zip, l.tel,  a.name AS agency,
+          SUM(IF(a.id >0, 1,0)) n_agency ";
+
+    if (POS_LV_CH_USER <= $me->access_lv && $me->access_lv <= POS_LV_CH_MANAGER) {
+      $manager_id = $preapp->manager_id;
+      $query_part =
+        " FROM lead_current_accounts ca
+            LEFT JOIN lead_locations ll ON ca.location_id =ll.id
+              LEFT JOIN leads l ON ll.lead_id =l.id
+                LEFT JOIN lead_relation_manager lm ON l.id =lm.lead_id
+                  LEFT JOIN login_users u1 ON lm.user_id =u1.id
+                LEFT JOIN lead_relation_agency la ON l.id =la.lead_id
+                  LEFT JOIN agencies a ON la.agency_id =a.id
+                  LEFT JOIN relation_agency_manager am ON la.agency_id =am.agency_id
+                    LEFT JOIN login_users u2 ON am.user_id =u2.id
+                LEFT JOIN states s ON l.state_id =s.id
+          WHERE ca.is_project >0 AND ca.is_selected >0 AND (u1.id =:manager_id1 OR (a.id >0 AND u2.id =:manager_id2))
+            GROUP BY ca.id ";
+
+      $db_rows = DB::select(" SELECT ca.id  $query_part ", [$manager_id, $manager_id]);
+      $row_count = count($db_rows);
+      
+      $db_rows_paginated = DB::select(
+        " $query_select 
+            $query_part
+            ORDER BY ca.is_complete DESC, ll.name, l.id DESC, ca.id DESC
+              LIMIT :skip, :take
+      ", [$manager_id, $manager_id, $request->start, $request->length, ]);
+
+    } else {
+      // master-agents have access to any accounts
+      $row_count = DB::table('lead_current_accounts')->whereRaw(" is_project >0 AND is_selected >0 ")->count();
+
+      $db_rows_paginated = DB::select(
+        " $query_select
+            FROM lead_current_accounts ca
+              LEFT JOIN lead_locations ll ON ca.location_id =ll.id
+                LEFT JOIN leads l ON ll.lead_id =l.id
+                  LEFT JOIN lead_relation_agency la ON l.id =la.lead_id
+                    LEFT JOIN agencies a ON la.agency_id =a.id
+                  LEFT JOIN states s ON l.state_id =s.id
+            WHERE ca.is_project >0 AND ca.is_selected >0
+              GROUP BY ca.id
+            ORDER BY ca.is_complete DESC, ll.name, l.id DESC, ca.id DESC
+              LIMIT :skip, :take
+      ", [$request->start, $request->length, ]);
+    }
+    
+    $row_items = [];
+    if ($db_rows_paginated) {
+      foreach ($db_rows_paginated as $row) {
+        $r_enc_id = enc_id($row->id);
+        
+        if ($row->is_complete)
+          $r_status = 'Project Completed';
+        else
+          $r_status = 'In Progress';
+
+        if ($row->n_agency >1)
+          $r_agency = '(Multiple Agencies)';
+        elseif ($row->n_agency >0 && $row->agency)
+          $r_agency = $row->agency;
+        else
+          $r_agency = '(Not Assigned)';
+
+        $r_cell_act = '
+          <a href="'.route('master.project.manage',['id'=> enc_id($row->lead_id)]).'"><i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i></a>
+        ';
+        /*
+        <th></th>
+        <th>Agency</th>
+        <th>Status</th>
+        <th>Customer</th>
+        <th>Phone</th>
+        <th>Address</th>
+        */
+        $row_items[] = [
+          $r_cell_act,
+          $r_status,
+          $r_agency,
+          '<strong><a href="'.route('master.project.manage',['id'=>  enc_id($row->lead_id)]).'">'.$row->cust_name.'</a></strong>',
+          format_tel($row->tel),
+          format_city_state_zip($row->city, $row->state_code, $row->zip),
+        ];
+      } // END foreach: $db_rows_paginated
+    }
+
+    $json_output ='{
+      "draw": '.$request->draw.',
+      "recordsTotal": '.$row_count.',
+      "recordsFiltered": '.$row_count.',
+      "data": '.json_encode($row_items).'
+    }';
+    return $json_output;
+  }
+  /**
+  * output JSON for DataTables: list of accounts (to be cancelled) in project-management ()
+  */
+  public function projectsCancel (Request $request)
+  {
+    $preapp = $request->get('preapp');
+    $me = Auth::user();
+
+    $query_select =
+    " SELECT ca.*, ll.addr, l.id AS lead_id, l.cust_name, l.city, s.code AS state_code, l.zip, l.tel,  a.name AS agency,
+        SUM(IF(a.id >0, 1,0)) n_agency ";
+
+    if (POS_LV_CH_USER <= $me->access_lv && $me->access_lv <= POS_LV_CH_MANAGER) {
+      $manager_id = $preapp->manager_id;
+      $query_part =
+        " FROM lead_current_accounts ca
+            LEFT JOIN lead_locations ll ON ca.location_id =ll.id
+              LEFT JOIN leads l ON ll.lead_id =l.id
+                LEFT JOIN lead_relation_manager lm ON l.id =lm.lead_id
+                  LEFT JOIN login_users u1 ON lm.user_id =u1.id
+                LEFT JOIN lead_relation_agency la ON l.id =la.lead_id
+                  LEFT JOIN agencies a ON la.agency_id =a.id
+                  LEFT JOIN relation_agency_manager am ON la.agency_id =am.agency_id
+                    LEFT JOIN login_users u2 ON am.user_id =u2.id
+                LEFT JOIN states s ON l.state_id =s.id
+          WHERE ca.is_project >0 AND ca.is_selected =0 AND (u1.id =:manager_id1 OR (a.id >0 AND u2.id =:manager_id2))
+            GROUP BY ca.id ";
+
+      $db_rows = DB::select(" SELECT ca.id  $query_part ", [$manager_id, $manager_id]);
+      $row_count = count($db_rows);
+      
+      $db_rows_paginated = DB::select(
+        " $query_select
+            $query_part
+            ORDER BY ca.is_complete DESC, ll.name, l.id DESC, ca.id DESC
+              LIMIT :skip, :take
+      ", [$manager_id, $manager_id, $request->start, $request->length, ]);
+
+    } else {
+      // master-agents have access to any accounts
+      $row_count = DB::table('lead_current_accounts')->whereRaw(" is_project >0 AND is_selected =0 ")->count();
+
+      $db_rows_paginated = DB::select(
+        " $query_select
+            FROM lead_current_accounts ca
+              LEFT JOIN lead_locations ll ON ca.location_id =ll.id
+                LEFT JOIN leads l ON ll.lead_id =l.id
+                  LEFT JOIN lead_relation_agency la ON l.id =la.lead_id
+                    LEFT JOIN agencies a ON la.agency_id =a.id
+                  LEFT JOIN states s ON l.state_id =s.id
+            WHERE ca.is_project >0 AND ca.is_selected =0
+              GROUP BY ca.id
+            ORDER BY ca.is_complete DESC, ll.name, l.id DESC, ca.id DESC
+              LIMIT :skip, :take
+      ", [$request->start, $request->length, ]);
+    }
+    
+    $row_items = [];
+    if ($db_rows_paginated) {
+      foreach ($db_rows_paginated as $row) {
+        $r_enc_id = enc_id($row->id);
+        
+        if ($row->is_complete)
+          $r_status = 'Project Completed';
+        else
+          $r_status = 'In Progress';
+
+        if ($row->n_agency >1)
+          $r_agency = '(Multiple Agencies)';
+        elseif ($row->n_agency >0 && $row->agency)
+          $r_agency = $row->agency;
+        else
+          $r_agency = '(Not Assigned)';
+
+        $r_cell_act = '
+          <a href="'.route('master.project.manage',['id'=> enc_id($row->lead_id)]).'"><i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i></a>
+        ';
+        /*
+        <th></th>
+        <th>Agency</th>
+        <th>Status</th>
+        <th>Customer</th>
+        <th>Phone</th>
+        <th>Address</th>
+        */
+        $row_items[] = [
+          $r_cell_act,
+          $r_status,
+          $r_agency,
+          '<strong><a href="'.route('master.project.manage',['id'=>  enc_id($row->lead_id)]).'">'.$row->cust_name.'</a></strong>',
+          format_tel($row->tel),
+          format_city_state_zip($row->city, $row->state_code, $row->zip),
+        ];
+      } // END foreach: $db_rows_paginated
+    }
+
+    $json_output ='{
+      "draw": '.$request->draw.',
+      "recordsTotal": '.$row_count.',
+      "recordsFiltered": '.$row_count.',
+      "data": '.json_encode($row_items).'
+    }';
+    return $json_output;
   }
 }

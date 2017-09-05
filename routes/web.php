@@ -57,6 +57,9 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/lead/new', 'Master\MasterLeadController@new')->name('master.lead.new');
     Route::get('/lead/manage/{id}', 'Master\MasterLeadController@manage')->name('master.lead.manage');
 
+    Route::get('/projects', 'Master\MasterProjectController@list'); // project.list
+    Route::get('/project/manage/{id}', 'Master\MasterProjectController@manage')->name('master.project.manage');
+
     /**
      * list of FORM (put/post/delete) action for DataTables.js
      */
@@ -65,6 +68,9 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/datatables/providers', 'Master\MasterDataTablesController@providers')->name('master.datatables.providers');
     Route::get('/datatables/services', 'Master\MasterDataTablesController@services')->name('master.datatables.services');
     Route::get('/datatables/leads', 'Master\MasterDataTablesController@leads')->name('master.datatables.leads');
+    Route::get('/datatables/projects/signed', 'Master\MasterDataTablesController@projectsSigned'); // datatables.projects-sign
+    Route::get('/datatables/projects/keep', 'Master\MasterDataTablesController@projectsKeep'); // datatables.projects-keep
+    Route::get('/datatables/projects/cancel', 'Master\MasterDataTablesController@projectsCancel'); // datatables.projects-cancel
 
     /**
      * list of overlay for ingenOverlay.js
@@ -82,33 +88,51 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/lead/json/customer/mod/{lead_id}', 'Master\MasterLeadController@overlayCustomerMod')->name('master.lead.overlay-customer-mod');
     Route::get('/lead/json/agency/assign/{lead_id}', 'Master\MasterLeadController@overlayAgencyAssign')->name('master.lead.overlay-agency-assign');
     Route::get('/lead/json/manager/assign/{lead_id}', 'Master\MasterLeadController@overlayManagerAssign')->name('master.lead.overlay-manager-assign');
-    Route::get('/lead/json/follower/mod/{lead_id}', 'Master\MasterLeadFollowerController@overlayMod')->name('master.lead.overlay-follower-mod');
-    Route::get('/lead/json/commission/{lead_id}', 'Master\MasterLeadManageController@overlayCommissionMod')->name('master.lead.overlay-commission');
-    Route::get('/lead/json/log/new/{lead_id}', 'Master\MasterLeadManageController@overlayLogNew')->name('master.lead.overlay-log-new');
-    Route::get('/lead/json/log/mod/{log_id}', 'Master\MasterLeadManageController@overlayLogMod')->name('master.lead.overlay-log-mod');
-    Route::get('/lead/json/log/history/{lead_id}', 'Master\MasterLeadManageController@overlayLogHistory')->name('master.lead.overlay-log-history');
+    Route::get('/lead/json/follower/mod/{lead_id}', 'Master\MasterLeadController@overlayFollowerMod')->name('master.lead.overlay-follower-mod');
+    Route::get('/lead/json/commission/{lead_id}', 'Master\MasterLeadController@overlayCommissionMod')->name('master.lead.overlay-commission');
+    Route::get('/lead/json/log/new/{lead_id}', 'Master\MasterLeadController@overlayLogNew')->name('master.lead.overlay-log-new');
+    Route::get('/lead/json/log/mod/{log_id}', 'Master\MasterLeadController@overlayLogMod')->name('master.lead.overlay-log-mod');
+    Route::get('/lead/json/log/history/{lead_id}', 'Master\MasterLeadController@overlayLogHistory')->name('master.lead.overlay-log-history');
 
     Route::get('/lead/json/location/new/{lead_id}', 'Master\MasterLeadLocationController@overlayLocationNew')->name('master.lead.overlay-loc-new');
     Route::get('/lead/json/location/mod/{loc_id}', 'Master\MasterLeadLocationController@overlayLocationMod')->name('master.lead.overlay-loc-mod');
+    Route::get('/lead/json/location/file/{loc_id}', 'Master\MasterLeadLocationController@overlayLocationFiles'); // lead.overlay-loc-file
     Route::get('/lead/json/account/new/{loc_id}', 'Master\MasterLeadLocationController@overlayAccountNew')->name('master.lead.overlay-accnt-new');
     Route::get('/lead/json/account/mod/{accnt_id}', 'Master\MasterLeadLocationController@overlayAccountMod')->name('master.lead.overlay-accnt-mod');
     Route::get('/lead/json/account/services/{quote_id}', 'Master\MasterLeadLocationController@overlayAccountServices')->name('master.lead.overlay-accnt-svc');
     Route::get('/lead/json/quote/new/{loc_id}', 'Master\MasterLeadLocationController@overlayQuoteNew')->name('master.lead.overlay-quote-new');
     Route::get('/lead/json/quote/mod/{quote_id}', 'Master\MasterLeadLocationController@overlayQuoteMod')->name('master.lead.overlay-quote-mod');
 
+    Route::get('/project/json/customer/mod/{lead_id}', 'Master\MasterProjectController@overlayCustomerMod')->name('master.project.overlay-customer-mod');
+    Route::get('/project/json/agency/assign/{lead_id}', 'Master\MasterProjectController@overlayAgencyAssign')->name('master.project.overlay-agency-assign');
+    Route::get('/project/json/manager/assign/{lead_id}', 'Master\MasterProjectController@overlayManagerAssign')->name('master.project.overlay-manager-assign');
+    Route::get('/project/json/follower/mod/{lead_id}', 'Master\MasterProjectController@overlayFollowerMod')->name('master.project.overlay-follower-mod');
+    Route::get('/project/json/commission/{lead_id}', 'Master\MasterProjectController@overlayCommissionMod')->name('master.project.overlay-commission');
+    Route::get('/project/json/log/new/{lead_id}', 'Master\MasterProjectController@overlayLogNew')->name('master.project.overlay-log-new');
+    Route::get('/project/json/log/mod/{log_id}', 'Master\MasterProjectController@overlayLogMod')->name('master.project.overlay-log-mod');
+    Route::get('/project/json/log/history/{lead_id}', 'Master\MasterProjectController@overlayLogHistory')->name('project.overlay-log-history');
+
+    Route::get('/project/json/location/file/{loc_id}', 'Master\MasterProjectController@overlayLocationFiles'); // project.overlay-loc-file
+    Route::get('/project/json/keep/product/{accnt_id}', 'Master\MasterProjectController@overlayProductMod')->name('master.project.overlay-keep-prod');
+    Route::get('/project/json/cancel/date/{accnt_id}', 'Master\MasterProjectController@overlayCancelDates')->name('master.project.overlay-cancel-date');
+    Route::get('/project/json/signed/date/{quote_id}', 'Master\MasterProjectController@overlaySignedDates')->name('master.project.overlay-sign-date');
+
     /**
      * list of AJAX functions
      */
-    Route::post('/lead/json/follower/update/{lead_id}', 'Master\MasterLeadFollowerController@ajaxUpdate')->name('master.lead.ajax-follower-update');
-    Route::delete('/lead/json/follower/master/delete/{lead_id}/{user_id}', 'Master\MasterLeadFollowerController@ajaxMasterDelete')->name('master.lead.ajax-follower-master-delete');
-    Route::delete('/lead/json/follower/provider/delete/{lead_id}/{order_no}', 'Master\MasterLeadFollowerController@ajaxProviderDelete')->name('master.lead.ajax-follower-provider-delete');
+    Route::post('/lead/json/follower/update/{lead_id}', 'Master\MasterLeadController@ajaxFollowerUpdate')->name('master.lead.ajax-follower-update');
+    Route::delete('/lead/json/follower/master/delete/{lead_id}/{user_id}', 'Master\MasterLeadController@ajaxFollowerMasterDelete')
+      ->name('master.lead.ajax-follower-master-delete');
+    Route::delete('/lead/json/follower/provider/delete/{lead_id}/{order_no}', 'Master\MasterLeadController@ajaxFollowerProviderDelete')
+      ->name('master.lead.ajax-follower-provider-delete');
     Route::post('/lead/json/customer/update/{lead_id}', 'Master\MasterLeadController@ajaxCustomerUpdate')->name('master.lead.ajax-customer-update');
-    Route::put('/lead/json/log/add/{lead_id}', 'Master\MasterLeadManageController@ajaxLogAdd')->name('master.lead.ajax-log-add');
-    Route::post('/lead/json/log/correct/{log_id}', 'Master\MasterLeadManageController@ajaxLogCorrect')->name('master.lead.ajax-log-correct');
+    Route::put('/lead/json/log/add/{lead_id}', 'Master\MasterLeadController@ajaxLogAdd')->name('master.lead.ajax-log-add');
+    Route::post('/lead/json/log/correct/{log_id}', 'Master\MasterLeadController@ajaxLogCorrect')->name('master.lead.ajax-log-correct');
 
     Route::put('/lead/json/location/add/{lead_id}', 'Master\MasterLeadLocationController@ajaxLocationAdd')->name('master.lead.ajax-loc-add');
     Route::post('/lead/json/location/update/{loc_id}', 'Master\MasterLeadLocationController@ajaxLocationUpdate')->name('master.lead.ajax-loc-update');
     Route::delete('/lead/json/location/delete/{loc_id}', 'Master\MasterLeadLocationController@ajaxLocationDelete')->name('master.lead.ajax-loc-delete');
+    Route::delete('/lead/json/location/file/delete/{file_id}', 'Master\MasterLeadController@ajaxLocationFileDelete'); // lead.ajax-loc-file-del
     Route::put('/lead/json/account/add/{loc_id}', 'Master\MasterLeadLocationController@ajaxAccountAdd')->name('master.lead.ajax-accnt-add');
     Route::post('/lead/json/account/toggle/{accnt_id}', 'Master\MasterLeadLocationController@ajaxAccountToggle')->name('master.lead.ajax-accnt-toggle');
     Route::post('/lead/json/account/update/{accnt_id}', 'Master\MasterLeadLocationController@ajaxAccountUpdate')->name('master.lead.ajax-accnt-update');
@@ -120,6 +144,20 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::delete('/lead/json/quote/delete/{quote_id}', 'Master\MasterLeadLocationController@ajaxQuoteDelete')->name('master.ead.ajax-quote-delete');
     Route::post('/lead/json/quote/mrc/update/{quote_id}', 'Master\MasterLeadLocationController@ajaxQuoteMRC')->name('master.lead.ajax-quote-mrc');
     Route::post('/lead/json/quote/nrc/update/{quote_id}', 'Master\MasterLeadLocationController@ajaxQuoteNRC')->name('master.lead.ajax-quote-nrc');
+
+    Route::post('/project/json/customer/update/{lead_id}', 'Master\MasterProjectController@ajaxCustomerUpdate')->name('master.project.ajax-customer-update');
+    Route::post('/project/json/follower/update/{lead_id}', 'Master\MasterProjectController@ajaxFollowerUpdate')->name('master.project.ajax-follower-update');
+    Route::delete('/project/json/follower/master/delete/{lead_id}/{order_no}', 'Master\MasterProjectController@ajaxFollowerMasterDelete')
+      ->name('master.project.ajax-follower-master-delete');
+    Route::delete('/project/json/follower/provider/delete/{lead_id}/{order_no}', 'Master\MasterProjectController@ajaxFollowerProviderDelete')
+      ->name('master.project.ajax-follower-provider-delete');
+    Route::put('/project/json/log/add/{lead_id}', 'Master\MasterProjectController@ajaxLogAdd')->name('master.project.ajax-log-add');
+    Route::post('/project/json/log/correct/{log_id}', 'Master\MasterProjectController@ajaxLogCorrect')->name('master.project.ajax-log-correct');
+    
+    Route::delete('/project/json/location/file/delete/{file_id}', 'Master\MasterProjectController@ajaxLocationFileDelete'); // project.ajax-loc-file-del
+    Route::post('/project/json/keep/product/update/{accnt_id}', 'Master\MasterProjectController@ajaxProductUpdate'); // project.ajax-keep-update
+    Route::post('/project/json/cancel/date/update/{accnt_id}', 'Master\MasterProjectController@ajaxCancelDateUpdate')->name('master.project.ajax-cancel-update');
+    Route::post('/project/json/signed/date/update/{quote_id}', 'Master\MasterProjectController@ajaxSignedDateUpdate')->name('master.project.ajax-sign-update');
 
     /**
      * list of FORM (put/post/delete) action
@@ -160,7 +198,23 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::post('/lead/manager/assign/{lead_id}', 'Master\MasterLeadController@managerAssign')->name('master.lead.manager-assign');
     Route::post('/lead/manager/primary/{lead_id}/{manager_id}', 'Master\MasterLeadController@managerSetPrimary')->name('master.lead.manager-primary');
     Route::post('/lead/manager/remove/{lead_id}/{manager_id}', 'Master\MasterLeadController@managerRemove')->name('master.lead.manager-remove');
-    Route::post('/lead/commission/update/{lead_id}', 'Master\MasterLeadManageController@overlayCommissionUpdate')->name('master.lead.commission-update');
+    Route::post('/lead/commission/update/{lead_id}', 'Master\MasterLeadController@commissionUpdate')->name('master.lead.commission-update');
+    Route::post('/lead/location/file/attach/{loc_id}', 'Master\MasterLeadController@locationFileAttach'); // lead.loc-file-attach
+    Route::post('/lead/account/proceed/{accnt_id}', 'Master\MasterLeadLocationController@accountProceed')->name('master.lead.accnt-proceed');
+    Route::post('/lead/quote/sign/{quote_id}', 'Master\MasterLeadLocationController@quoteSign')->name('master.lead.quote-sign');
+
+    Route::post('/project/manager/assign/{lead_id}', 'Master\MasterProjectController@managerAssign')->name('master.project.manager-assign');
+    Route::post('/project/manager/primary/{lead_id}/{manager_id}', 'Master\MasterProjectController@managerSetPrimary')->name('master.project.manager-primary');
+    Route::post('/project/manager/remove/{lead_id}/{manager_id}', 'Master\MasterProjectController@managerRemove')->name('master.project.manager-remove');
+    Route::post('/project/commission/update/{lead_id}', 'Master\MasterProjectController@commissionUpdate')->name('master.project.commission-update');
+    Route::post('/project/location/file/attach/{loc_id}', 'Master\MasterProjectController@locationFileAttach'); // project.loc-file-attach
+
+    Route::post('/project/account/complete/{accnt_id}', 'Master\MasterProjectController@accountComplete'); // project.accnt-complete
+    Route::post('/project/account/complete/undo/{accnt_id}', 'Master\MasterProjectController@accountCompleteUndo'); // project.accnt-complete-undo
+    Route::delete('/project/account/revert/{accnt_id}', 'Master\MasterProjectController@accountRevert'); // project.accnt-revert
+    Route::post('/project/signed/complete/{quote_id}', 'Master\MasterProjectController@signedComplete'); // project.sign-complete
+    Route::post('/project/signed/complete/undo/{quote_id}', 'Master\MasterProjectController@signedCompleteUndo'); // project.sign-complete-undo
+    Route::delete('/project/signed/revert/{quote_id}', 'Master\MasterProjectController@signedRevert'); // project.sign-revert
   });
 
   /**
@@ -194,6 +248,7 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/lead/report/current/{id}', 'LeadReportController@current')->name('lead.rpt.current');
     Route::get('/lead/report/quote/{id}', 'LeadReportController@quote')->name('lead.rpt.quote');
 
+    Route::get('/projects', 'ProjectController@list')->name('project.list');
     Route::get('/project/manage/{id}', 'ProjectController@manage')->name('project.manage');
 
     /**
@@ -205,16 +260,19 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/datatables/customers', 'DataTablesController@customers')->name('datatables.customers');
     Route::get('/datatables/salespersons', 'DataTablesController@salesperson')->name('datatables.salesperson');
     Route::get('/datatables/leads', 'DataTablesController@leads')->name('datatables.leads');
+    Route::get('/datatables/projects/signed', 'DataTablesController@projectsSigned')->name('datatables.projects-sign');
+    Route::get('/datatables/projects/keep', 'DataTablesController@projecstKeep')->name('datatables.projects-keep');
+    Route::get('/datatables/projects/cancel', 'DataTablesController@projectsCancel')->name('datatables.projects-cancel');
 
     /**
      * list of overlay for ingenOverlay.js
      */
+    /*
     Route::post('/customer/overlay/contact/new/{id}', 'CustomerController@overlayNewContact')->name('customer.overlay-contact-new');
     Route::post('/customer/overlay/contact/mod/{id}', 'CustomerController@overlayModContact')->name('customer.overlay-contact-mod');
 
     Route::post('/salesperson/overlay/new', 'SalespersonController@overlayNew')->name('salesperson.overlay-new');
     Route::post('/salesperson/overlay/mod/{id}', 'SalespersonController@overlayMod')->name('salesperson.overlay-mod');
-    /*
     Route::get('/lead/json/customers', 'LeadController@overlayCustomerList')->name('lead.overlay-customer-list');
     Route::get('/lead/json/customer/new', 'LeadController@overlayCustomerNew')->name('lead.overlay-customer-new'); // query: lead_id? 
     */
@@ -224,18 +282,29 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/lead/json/salesperson/new', 'LeadController@overlaySalespersonNew')->name('lead.overlay-salesperson-new'); // query: lead_id? 
     Route::get('/lead/json/salesperson/mod/{lead_id}', 'LeadController@overlaySalespersonMod')->name('lead.overlay-salesperson-mod');
     */
-    Route::get('/lead/json/follower/mod/{lead_id}', 'LeadFollowerController@overlayMod')->name('lead.overlay-follower-mod');
-    Route::get('/lead/json/log/new/{lead_id}', 'LeadManageController@overlayLogNew')->name('lead.overlay-log-new');
-    Route::get('/lead/json/log/mod/{log_id}', 'LeadManageController@overlayLogMod')->name('lead.overlay-log-mod');
-    Route::get('/lead/json/log/history/{lead_id}', 'LeadManageController@overlayLogHistory')->name('lead.overlay-log-history');
+    Route::get('/lead/json/follower/mod/{lead_id}', 'LeadController@overlayFollowerMod')->name('lead.overlay-follower-mod');
+    Route::get('/lead/json/log/new/{lead_id}', 'LeadController@overlayLogNew')->name('lead.overlay-log-new');
+    Route::get('/lead/json/log/mod/{log_id}', 'LeadController@overlayLogMod')->name('lead.overlay-log-mod');
+    Route::get('/lead/json/log/history/{lead_id}', 'LeadController@overlayLogHistory')->name('lead.overlay-log-history');
 
     Route::get('/lead/json/location/new/{lead_id}', 'LeadLocationController@overlayLocationNew')->name('lead.overlay-loc-new');
     Route::get('/lead/json/location/mod/{loc_id}', 'LeadLocationController@overlayLocationMod')->name('lead.overlay-loc-mod');
+    Route::get('/lead/json/location/file/{loc_id}', 'LeadController@overlayLocationFiles')->name('lead.overlay-loc-file');
     Route::get('/lead/json/account/new/{loc_id}', 'LeadLocationController@overlayAccountNew')->name('lead.overlay-accnt-new');
     Route::get('/lead/json/account/mod/{accnt_id}', 'LeadLocationController@overlayAccountMod')->name('lead.overlay-accnt-mod');
     Route::get('/lead/json/account/services/{quote_id}', 'LeadLocationController@overlayAccountServices')->name('lead.overlay-accnt-svc');
     Route::get('/lead/json/quote/new/{loc_id}', 'LeadLocationController@overlayQuoteNew')->name('lead.overlay-quote-new');
     Route::get('/lead/json/quote/mod/{quote_id}', 'LeadLocationController@overlayQuoteMod')->name('lead.overlay-quote-mod');
+
+    Route::get('/project/json/customer/mod/{lead_id}', 'ProjectController@overlayCustomerMod')->name('project.overlay-customer-mod');
+    Route::get('/project/json/follower/mod/{lead_id}', 'ProjectController@overlayFollowerMod')->name('project.overlay-follower-mod');
+    Route::get('/project/json/log/new/{lead_id}', 'ProjectController@overlayLogNew')->name('project.overlay-log-new');
+    Route::get('/project/json/log/mod/{log_id}', 'ProjectController@overlayLogMod')->name('project.overlay-log-mod');
+    Route::get('/project/json/log/history/{lead_id}', 'ProjectController@overlayLogHistory')->name('project.overlay-log-history');
+    Route::get('/project/json/location/file/{loc_id}', 'ProjectController@overlayLocationFiles')->name('project.overlay-loc-file');
+    Route::get('/project/json/keep/product/{accnt_id}', 'ProjectController@overlayProductMod')->name('project.overlay-keep-prod');
+    Route::get('/project/json/cancel/date/{accnt_id}', 'ProjectController@overlayCancelDates')->name('project.overlay-cancel-date');
+    Route::get('/project/json/signed/date/{quote_id}', 'ProjectController@overlaySignedDates')->name('project.overlay-sign-date');
 
     /**
      * list of AJAX functions
@@ -247,15 +316,16 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::post('/lead/json/salesperson/update/{lead_id}', 'LeadController@ajaxSalespersonUpdate')->name('lead.ajax-salesperson-update');
     Route::delete('/lead/json/salesperson/remove/{lead_id}', 'LeadController@ajaxSalespersonRemove')->name('lead.ajax-salesperson-remove');
 */
-    Route::post('/lead/json/follower/update/{lead_id}', 'LeadFollowerController@ajaxUpdate')->name('lead.ajax-follower-update');
-    Route::delete('/lead/json/follower/agent/delete/{lead_id}/{order_no}', 'LeadFollowerController@ajaxAgentDelete')->name('lead.ajax-follower-agent-delete');
-    Route::delete('/lead/json/follower/provider/delete/{lead_id}/{order_no}', 'LeadFollowerController@ajaxProviderDelete')->name('lead.ajax-follower-provider-delete');
-    Route::put('/lead/json/log/add/{lead_id}', 'LeadManageController@ajaxLogAdd')->name('lead.ajax-log-add');
-    Route::post('/lead/json/log/correct/{log_id}', 'LeadManageController@ajaxLogCorrect')->name('lead.ajax-log-correct');
+    Route::post('/lead/json/follower/update/{lead_id}', 'LeadController@ajaxFollowerUpdate')->name('lead.ajax-follower-update');
+    Route::delete('/lead/json/follower/agent/delete/{lead_id}/{order_no}', 'LeadController@ajaxFollowerAgentDelete')->name('lead.ajax-follower-agent-delete');
+    Route::delete('/lead/json/follower/provider/delete/{lead_id}/{order_no}', 'LeadController@ajaxFollowerProviderDelete')->name('lead.ajax-follower-provider-delete');
+    Route::put('/lead/json/log/add/{lead_id}', 'LeadController@ajaxLogAdd')->name('lead.ajax-log-add');
+    Route::post('/lead/json/log/correct/{log_id}', 'LeadController@ajaxLogCorrect')->name('lead.ajax-log-correct');
 
     Route::put('/lead/json/location/add/{lead_id}', 'LeadLocationController@ajaxLocationAdd')->name('lead.ajax-loc-add');
     Route::post('/lead/json/location/update/{loc_id}', 'LeadLocationController@ajaxLocationUpdate')->name('lead.ajax-loc-update');
     Route::delete('/lead/json/location/delete/{loc_id}', 'LeadLocationController@ajaxLocationDelete')->name('lead.ajax-loc-delete');
+    Route::delete('/lead/json/location/file/delete/{file_id}', 'LeadController@ajaxLocationFileDelete')->name('lead.ajax-loc-file-del');
     Route::put('/lead/json/account/add/{loc_id}', 'LeadLocationController@ajaxAccountAdd')->name('lead.ajax-accnt-add');
     Route::post('/lead/json/account/toggle/{accnt_id}', 'LeadLocationController@ajaxAccountToggle')->name('lead.ajax-accnt-toggle');
     Route::post('/lead/json/account/update/{accnt_id}', 'LeadLocationController@ajaxAccountUpdate')->name('lead.ajax-accnt-update');
@@ -268,10 +338,21 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::post('/lead/json/quote/mrc/update/{quote_id}', 'LeadLocationController@ajaxQuoteMRC')->name('lead.ajax-quote-mrc');
     Route::post('/lead/json/quote/nrc/update/{quote_id}', 'LeadLocationController@ajaxQuoteNRC')->name('lead.ajax-quote-nrc');
 
+    Route::post('/project/json/customer/update/{lead_id}', 'ProjectController@ajaxCustomerUpdate')->name('project.ajax-customer-update');
+    Route::post('/project/json/follower/update/{lead_id}', 'ProjectController@ajaxFollowerUpdate')->name('project.ajax-follower-update');
+    Route::delete('/project/json/follower/agent/delete/{lead_id}/{order_no}', 'ProjectController@ajaxFollowerAgentDelete')->name('project.ajax-follower-agent-delete');
+    Route::delete('/project/json/follower/provider/delete/{lead_id}/{order_no}', 'ProjectController@ajaxFollowerProviderDelete')->name('project.ajax-follower-provider-delete');
+    Route::put('/project/json/log/add/{lead_id}', 'ProjectController@ajaxLogAdd')->name('project.ajax-log-add');
+    Route::post('/project/json/log/correct/{log_id}', 'ProjectController@ajaxLogCorrect')->name('project.ajax-log-correct');
+    
+    Route::delete('/project/json/location/file/delete/{file_id}', 'ProjectController@ajaxLocationFileDelete')->name('project.ajax-loc-file-del');
+    Route::post('/project/json/keep/product/update/{accnt_id}', 'ProjectController@ajaxProductUpdate')->name('project.ajax-keep-update');
+    Route::post('/project/json/cancel/date/update/{accnt_id}', 'ProjectController@ajaxCancelDateUpdate')->name('project.ajax-cancel-update');
+    Route::post('/project/json/signed/date/update/{quote_id}', 'ProjectController@ajaxSignedDateUpdate')->name('project.ajax-sign-update');
+
     /**
     * list of FORM (put/post/delete) action
     **/
-    // Route::put('/user/create', 'UserController@create')->name('user.create');
     Route::post('/user/update/{id}', 'UserController@update')->name('user.update');
     Route::post('/user/update-pw/{id}', 'UserController@updatePassword')->name('user.update-pw');
     Route::post('/user/update-agency', 'UserController@updateAgency')->name('user.update-agency');
@@ -290,11 +371,20 @@ Route::group(['middleware' => ClearCache::class], function () {
 
     Route::put('/lead/create', 'LeadController@create')->name('lead.create');
     Route::post('/lead/request/{id}', 'LeadController@requestQuote')->name('lead.request-quote');
+    Route::post('/lead/location/file/attach/{loc_id}', 'LeadLocationController@locationFileAttach')->name('lead.loc-file-attach');
     Route::post('/lead/account/proceed/{accnt_id}', 'LeadLocationController@accountProceed')->name('lead.accnt-proceed');
     Route::post('/lead/quote/sign/{quote_id}', 'LeadLocationController@quoteSign')->name('lead.quote-sign');
+
+    Route::post('/project/location/file/attach/{loc_id}', 'ProjectController@locationFileAttach')->name('project.loc-file-attach');
+    Route::post('/project/account/complete/{accnt_id}', 'ProjectController@accountComplete')->name('project.accnt-complete');
+    Route::post('/project/account/complete/undo/{accnt_id}', 'ProjectController@accountCompleteUndo')->name('project.accnt-complete-undo');
+    Route::delete('/project/account/revert/{accnt_id}', 'ProjectController@accountRevert')->name('project.accnt-revert');
+    Route::post('/project/signed/complete/{quote_id}', 'ProjectController@signedComplete')->name('project.sign-complete');
+    Route::post('/project/signed/complete/undo/{quote_id}', 'ProjectController@signedCompleteUndo')->name('project.sign-complete-undo');
+    Route::delete('/project/signed/revert/{quote_id}', 'ProjectController@signedRevert')->name('project.sign-revert');
     /*
     Route::post('/lead/update/{id}', 'LeadController@update')->name('lead.update');
-    */
     Route::delete('/lead/delete/{id}', 'LeadController@delete')->name('lead.delete');
+    */
   });
 });

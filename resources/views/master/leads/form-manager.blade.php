@@ -3,9 +3,10 @@
 * required vars
 * @param $managers: available managers
 * @param $lead_id: currently opened lead ID
+* @param $frm_url: URL to submit form
 */
 ?>
-{!! Form::open(['url'=> route('master.lead.manager-assign', ['id'=> enc_id($lead_id)]), 'class'=> 'frm-manager']) !!}
+{!! Form::open(['url'=> $frm_url, 'class'=> 'frm-manager']) !!}
   {!! Form::hidden('manager_id') !!}
   
   <h2>Available Managers</h2>

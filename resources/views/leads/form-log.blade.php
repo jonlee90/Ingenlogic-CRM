@@ -12,7 +12,7 @@
 <div class="input-group">
   <label>Message</label>
   <div class="wrapper-textarea lead-log-textarea">
-    {!! Form::textarea('msg', $msg, ['maxlength'=> 500, 'cols'=> 50, 'rows'=> 10 ]) !!}
+    {!! Form::textarea('msg', $msg, ['maxlength'=> 500, 'cols'=> 50, 'rows'=> 10, 'required' ]) !!}
     <div class="chr-left">{{ strlen(str_replace("\r\n","\n", $msg)) }} / 500</div>
   </div>
 </div>

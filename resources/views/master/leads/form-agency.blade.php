@@ -3,9 +3,10 @@
 * required vars
 * @param $agencies: available agencies
 * @param $lead_id: currently opened lead ID
+* @param $frm_url: URL to submit form
 */
 ?>
-{!! Form::open(['url'=> route('master.lead.agency-assign', ['id'=> enc_id($lead_id)]), 'class'=> 'frm-agency']) !!}
+{!! Form::open(['url'=> $frm_url, 'class'=> 'frm-agency']) !!}
   {!! Form::hidden('agency_id') !!}
   
   <h2>Available Agencies</h2>

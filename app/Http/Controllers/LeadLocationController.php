@@ -15,9 +15,6 @@ use Validator;
 
 class LeadLocationController extends LeadController
 {
-  // traits
-  use GetLead;
-
   // custom variables
   private $log_src = 'LeadLocationController';
 
@@ -98,7 +95,7 @@ class LeadLocationController extends LeadController
         </div>
 
       '.Form::close().'
-      <script>oAlL2()</script>
+      <script>aoLocationUpdate()</script>
 		';
 		return json_encode([
 			'success'=>1, 'error'=>0,
@@ -873,7 +870,9 @@ class LeadLocationController extends LeadController
       }
     }
     DB::table('lead_current_accounts')->where('id', $accnt_id)->update([
-      'mod_id'=> $me->id, 'mod_user'=> trim($me->fname.' '.$me->lname), 'is_project'=> DB::raw(1),
+      'mod_id'=> $me->id, 'mod_user'=> trim($me->fname.' '.$me->lname),
+      'is_project'=> DB::raw(1),
+      'date_portout'=> NULL, 'date_cancel'=> NULL, 
     ]);
       
     
@@ -1604,7 +1603,13 @@ class LeadLocationController extends LeadController
       
 
     DB::table('lead_quotes')->where('id', $quote_id)->update([
-      'mod_id'=> $me->id, 'mod_user'=> trim($me->fname.' '.$me->lname), 'is_project'=> DB::raw(1), 'date_signed'=> date('Y-m-d'),
+      'mod_id'=> $me->id, 'mod_user'=> trim($me->fname.' '.$me->lname),
+      'is_project'=> DB::raw(1),
+      'date_signed'=> date('Y-m-d'),
+      'date_inspect'=> NULL, 'inspect_done'=> DB::raw(0),
+      'date_construct'=> NULL, 'construct_done'=> DB::raw(0),
+      'date_install'=> NULL, 'install_done'=> DB::raw(0),
+      'date_portin'=> NULL, 'portin_done'=> DB::raw(0),
     ]);
       
     
