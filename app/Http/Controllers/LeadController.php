@@ -70,8 +70,9 @@ class LeadController extends Controller
     if (!$lead)
       return log_redirect('Lead Not found.', ['src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id]);
 
-
+    
     $data = $this->leadReload($lead, $agency_id);
+    
     return view('leads.manage')
       ->with('preapp', $request->get('preapp'))
       ->with('data', $data)
@@ -253,7 +254,7 @@ class LeadController extends Controller
           ORDER BY valid, f_name, f.user_id DESC
     ", [POS_LV_MASTER_ADMIN, POS_LV_CH_USER, $lead_id]);
     $follower_agents = DB::select(
-      " SELECT f.order_no, f.agency_id, IF(u.id >0 AND a.id >0, 1,0) AS valid,
+      " SELECT f.order_no, f.user_id, f.agency_id, IF(u.id >0 AND a.id >0, 1,0) AS valid,
             IF(u.id >0 AND a.id >0, a.name, f.agency) AS agency,
             IF(u.id >0 AND a.id >0, TRIM(CONCAT(u.fname,' ',u.lname)), f.name) AS f_name,
             IF(u.id >0 AND a.id >0, u.title, f.title) AS title,
@@ -397,7 +398,7 @@ class LeadController extends Controller
   * @param $vars (optional): array of additional output to include in JSON output (by default, empty)
   * @return JSON with HTML outputs
   **/
-  private function jsonReload ($lead_id, $agency_id, $vars = [])
+  public function jsonReload ($lead_id, $agency_id, $vars = [])
   {
     $log_src = $this->log_src.'@jsonReload';
 
@@ -548,8 +549,15 @@ class LeadController extends Controller
   */
   public function overlayFollowerMod(Request $request)
   {
+    
     return $this->traitFollowerMod($request, route('lead.ajax-follower-update', ['lead_id'=> $request->lead_id]));
   }
+
+  public function overlayAlertMod(Request $request)
+  {
+    return $this->traitAlertMod($request, route('lead.ajax-alert-send', ['lead_id' => $request->lead_id]));
+  }
+
   /**
   * Action: update lead x followers (agent and/or provider-contacts) => output data in JSON.
   *  use LeadTrait->traitFollowerUpdate()
@@ -558,6 +566,13 @@ class LeadController extends Controller
   {
     return $this->traitFollowerUpdate($request);
   }
+
+// Action update alert list
+  public function ajaxAlertSend(Request $request)
+  {
+    return $this->traitAlertSend($request);
+  }
+
   /**
   * AJAX Action: delete lead x followers (agent) => output data in JSON.
   *  use LeadTrait->traitFollowerUpdate()

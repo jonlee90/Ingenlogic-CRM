@@ -8,9 +8,10 @@
 <ul>
   @forelse ($logs as $log)
   <li class="<?=($log->is_corrected)? 'grayed':'' ?>">
+    
     <div class="clear-fix">
       <b>{{ $log->mod_user }}</b>
-
+      <i class='fa-bell tag-log-alarm'>{{ Form::hidden('id', $log->id, ['class' => 'log-id']) }}</i>
       @if ($log->is_corrected)
       <div class="tag-log-corrected"></div>
 
@@ -41,4 +42,5 @@
   </li>
   @empty
   @endforelse
+
 </ul>

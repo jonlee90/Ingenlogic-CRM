@@ -294,6 +294,7 @@ if ($lead->quote_requested)
 <script src="/js/ingen.calendar.js"></script>
 <script src="/js/jquery.dataTables.min.js"></script>
 <script>
+ 
 window.aLeadManage = function() {
   var $win = $(window);
   var resizeControlPanel = function() {
@@ -514,6 +515,10 @@ window.aLeadManage = function() {
       method: 'GET', data: {}
     });
   }
+  
+ 
+
+
   var fnReloadLeadHandlers = function() {
     $sectionLeadControlAccount.find('.btn-follow-del').click(fnFollowerDel);
     $sectionLeadControlAccount.find('.btn-log-mod').click(fnLogCorrect);
@@ -1088,6 +1093,46 @@ window.aLeadManage = function() {
       });
     });
   }
+  window.aoLeadAlert = function() {
+    var fnDelRow = function() { $(this).closest('tr').fadeOut({complete: function() { $(this).remove(); }}); };
+    
+    $overlayPane.find('.btn-row-add').click(function() {
+      var $frmFollower = $overlayPane.find('form.frm-follower');
+      var $newRow = $(this).clone().removeClass('btn-row-add');
+      
+      // follower cannot have duplicate contacts
+      if ($(this).closest('.container-change').hasClass('agent'))
+        var dupe = ($frmFollower.find('tbody input[name="user_id[]"][value="' + $newRow.find('input[name="user_id[]"]').val() + '"]').length >0);
+     
+      if (dupe) {
+        alertUser("Followers cannot have duplicate contacts.");
+        return false;
+      }
+      
+      var $btnDel = $('<i/>', {class: 'md s btn-del-row', title: 'Remove Follower'})
+        .text('close')
+        .click(fnDelRow);
+      $newRow.find('td:first').html('').append($btnDel);
+      
+      $overlayPane.find('.tbl-lead-follower-list tbody').append($newRow);
+    });
+    $overlayPane.find('.btn-del-row').click(fnDelRow);
+
+    $overlayPane.find('.frm-follower').submit(function(e) {
+      e.preventDefault();
+
+      var $frm = $(this);
+      reqAjax({
+        url: $frm.prop('action'),
+        data: $frm.serializeArray(),
+        fnSuccess: function(json) {
+          fnReloadLead(json);
+          overlay.close();
+          toastUser('Alert has been sent!');
+        },
+      });
+    });
+  }
   // log-new AND mod (=add new, corrected log)
   window.aoLogAdd = function() {
     $overlayPane.find('.wrapper-textarea textarea').on('input blur', function() { updateTextareaChr(this); });
@@ -1168,16 +1213,40 @@ window.aLeadManage = function() {
         .append($('<div/>', {class: 'btn-group'}).append($btnAgent).append(' ').append($btnProv))
         .append($('<div/>', {class: 'container-change agent'}))
     );
+
+
     // by default open 'update provider'
     reqAjax({
       url: laraRoute('lead.overlay-follower-mod') + encLeadId,
-      method: 'GET', data: {},
+      method: 'GET', 
+      data: {},
       fnSuccess: fnFillContainerChange,
       fnFail: function(json) { alertUser(json.msg); overlay.close(); },
     }); // END: reqAjax
     overlay.open();
   });
-
+  $(document).on('click', '.tag-log-alarm', function() {
+      var userId = [];
+      var logId = $(this).find('.log-id').val();
+      console.log(logId);
+      $('.follower-id').each(function() {
+        userId.push($(this).val());
+      });
+      overlay.setTitle('Send Alert');
+      overlay.setContent(
+        $('<div/>', {class: ''})
+          .append($('<div/>', {class: 'container-change agent'}))
+      );
+      // by default open 'update provider'
+      reqAjax({
+        url: laraRoute('lead.overlay-alert-mod') + encLeadId,
+        method: 'GET', 
+        data: { users: userId, log: logId },
+        fnSuccess: fnFillContainerChange,
+        fnFail: function(json) { alertUser(json.msg); overlay.close(); },
+      }); // END: reqAjax
+      overlay.open();  
+  });
   // ***** control panel: customer and salesperson *****
   $('.btn-customer-mod').click(function() {
     overlay.setTitle('Update Customer');

@@ -23,6 +23,7 @@
       '<i class="md s grayed">phone</i></a> <div class="popup-tip right"><div>Phone # Not Available</div></div>';
   ?>
   <li class="<?=($follower->valid)? '':'grayed' ?>">
+    {{ Form::hidden('id', $follower->user_id, ['class' => 'follower-id']) }}
     <div>
       <span class="follower-tag master"></span>
       <div class="follower-actions">
@@ -54,10 +55,13 @@
     $telHTML = ($follower->tel)?
       '<a href="mailto:'.$follower->tel.'"><i class="md s">phone</i></a> <div class="popup-tip"><div>Call the Contact</div></div>' :
       '<i class="md s grayed">phone</i></a> <div class="popup-tip"><div>Phone # Not Available</div></div>';
+
   ?>
   <li data-order="{{ enc_id($follower->order_no) }}" class="<?=($follower->valid)? '':'grayed' ?>">
+    {{ Form::hidden('id', $follower->user_id, ['class' => 'follower-id']) }}
     <div>
       @if($follower->valid)
+      
       <span class="follower-tag agency"><?=($follower->agency)?  $follower->agency : '-' ?></span>
       @else
       <span class="follower-tag invalid"></span>

@@ -984,6 +984,10 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
   padding: 3px 8px; border-radius: 3px;
   background: #999; color: white;
 }
+.tag-log-alarm {
+  position: absolute;
+  right: 65px;
+}
 .lead-log-history .tag-log-corrected::before { content: "corrected"; }
 .lead-log-history .tag-log-system::before { content: "system"; }
 .lead-log-history .log-msg + .log-detail { margin-top: 10px; }

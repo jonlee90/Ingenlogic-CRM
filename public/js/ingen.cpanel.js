@@ -491,7 +491,6 @@ function laraRoute(routeName) {
       return '/datatables/projects/keep';
     case 'datatables.projects-cancel':
       return '/datatables/projects/cancel';
-      
     case 'master.provider.overlay-prod-new':
       return '/provider/json/product/new/'; // + provider-id
     case 'master.provider.overlay-prod-mod':
@@ -529,6 +528,8 @@ function laraRoute(routeName) {
     case 'master.lead.overlay-follower-mod':
     case 'lead.overlay-follower-mod':
       return '/lead/json/follower/mod/'; // + lead-id
+    case 'lead.overlay-alert-mod':
+      return '/lead/json/alert/mod/'; // + lead-id
     case 'master.lead.overlay-log-new':
     case 'lead.overlay-log-new':
       return '/lead/json/log/new/'; // + lead-id
