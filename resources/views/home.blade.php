@@ -141,6 +141,59 @@ if ($myMsgReplyCount >0) {
       ';
     ?>
   </div>
+
+  <div class="panel block">
+    <h2>Alerts</h2>
+    <div class="input-group">
+      <label>Unread Alerts</label>
+      <div class="output"><span class="dash-tag-count"><?= $alert_count ?></span> alerts</div>
+    </div>
+    <div class="input-group">
+      <input type='button' class='view-alert btn-view-alerts' value='Show All Alerts'/>
+    </div>
+    @if(count($alerts) > 0)
+      <div class='alerts-container'>
+        @foreach ($alerts as $alert)
+          <div class='alert-container' style='background-color: {{ $alert->is_read == 0 ? "rgba(248, 246, 149, .6)" : "" }}'>
+            <div class='alert-link-container'>
+              <div class='outer-link'>
+                <div class='inner-link'>
+                  <a href='{{ route("alert.manage", ["id" => $alert->alert_type_id, "type" => $alert->alert_type, "alert" => $alert->id]) }}'><i class="fa-external-link btn-go-lead" title="Go to Lead"></i></a>
+                </div>
+              </div>
+            </div>
+            <div class='alert-content-container'>
+              <div class="a_date">Date: {{ $alert->date_added }}</div>
+              <div>
+                <div class="a_name">Sent By: {{ $alert->name }}</div>
+              </div>
+              <div class="a_msg">{!! $alert->alert_msg !!}</div>
+            </div>
+          </div>
+        @endforeach
+      </div>
+    
+
+
+    <!---
+    <table>
+      <thead>
+        <tr> <th></th><th>Sent By</th><th>Log By</th> <th>Date</th> <th>Message</th> </tr>
+      </thead>
+      <tbody>
+        @foreach ($alerts as $alert)
+          <tr class="btn-row-add">
+            <td><a href='{{ route("alert.manage", ["id" => $alert->alert_type_id, "type" => $alert->alert_type, "alert" => $alert->id]) }}'><i class="fa-external-link btn-go-lead" title="Go to Lead"></i></a></td>
+            <td class="row-s_name">{{ $alert->name }}</td>
+            <td class="row-date">{{ $alert->date_added }}</td>
+            <td class="row-msg">{!! $alert->alert_msg !!}</td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+    -->
+    @endif
+  </div>
   
   <div class="panel block">
     <a href="<?=('msg-edit?new=1') ?>"><input type="button" value="Write New Message" /></a>
@@ -286,5 +339,31 @@ function mSlT2() {
 }
 // declare overlay as global var to be used in oVsE1()
 var overlay;mSlT2();
+
+var $overlayPane = $('#overlay-pane');
+$overlayPane.find('.overlay-inner').append( $('<div/>', {class: 'cal-pane'}) );
+var fnFillContainerChange = function(json) {
+  $overlayPane.find('.container-change').html(json.html);
+  $("#overlay-pane .btn-cancel").click(function() { overlay.close(); });
+};
+$('.view-alert').on('click', function() {
+
+  overlay.setTitle('My Alerts');
+  overlay.openAjax({
+    url: laraRoute('home.overlay-alert-mod'),
+    method: 'GET', data: {}
+  });
+
+/*
+      reqAjax({
+        url: laraRoute('home.overlay-alert-mod'),
+        method: 'GET', 
+        data: {},
+        fnSuccess: fnFillContainerChange,
+        fnFail: function(json) { alertUser(json.msg); overlay.close(); },
+      }); // END: reqAjax
+      overlay.open();  
+      */
+});
 </script>
 @endsection

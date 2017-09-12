@@ -242,9 +242,10 @@ Route::group(['middleware' => ClearCache::class], function () {
     
     Route::get('/salespersons', 'SalespersonController@list')->name('salesperson.list');
     */
+
     Route::get('/leads', 'LeadController@list')->name('lead.list');
     Route::get('/lead/new', 'LeadController@new')->name('lead.new');
-    Route::get('/lead/manage/{id}', 'LeadController@manage')->name('lead.manage');
+    Route::get('/lead/manage/{id}/{alert?}', 'LeadController@manage')->name('lead.manage');
     Route::get('/lead/report/current/{id}', 'LeadReportController@current')->name('lead.rpt.current');
     Route::get('/lead/report/quote/{id}', 'LeadReportController@quote')->name('lead.rpt.quote');
 
@@ -286,7 +287,7 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/lead/json/log/new/{lead_id}', 'LeadController@overlayLogNew')->name('lead.overlay-log-new');
     Route::get('/lead/json/log/mod/{log_id}', 'LeadController@overlayLogMod')->name('lead.overlay-log-mod');
     Route::get('/lead/json/log/history/{lead_id}', 'LeadController@overlayLogHistory')->name('lead.overlay-log-history');
-    Route::get('/lead/json/alert/mod/{lead_id}', 'LeadController@overlayAlertMod')->name('lead.overlay-alert-mod');
+
 
     Route::get('/lead/json/location/new/{lead_id}', 'LeadLocationController@overlayLocationNew')->name('lead.overlay-loc-new');
     Route::get('/lead/json/location/mod/{loc_id}', 'LeadLocationController@overlayLocationMod')->name('lead.overlay-loc-mod');
@@ -324,7 +325,11 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::post('/lead/json/log/correct/{log_id}', 'LeadController@ajaxLogCorrect')->name('lead.ajax-log-correct');
 
     // ALERT 
-    Route::post('/lead/json/alert/send/{lead_id}', 'LeadController@ajaxAlertSend')->name('lead.ajax-alert-send');
+    Route::post('/lead/ajaxAlertSend/{id}', 'LeadController@ajaxAlertSend')->name('lead.ajax-alert-send');
+    Route::get('/home/json/alert/mod', 'HomeController@ajaxAlertGet')->name('home.overlay-alert-mod');   
+    Route::get('/alert/manage/{id}/{type}/{alert?}', 'AlertController@manage')->name('alert.manage');
+    Route::get('/lead/json/alert/mod/{id}', 'LeadController@overlayAlertMod')->name('lead.overlay-alert-mod');
+
 
     Route::put('/lead/json/location/add/{lead_id}', 'LeadLocationController@ajaxLocationAdd')->name('lead.ajax-loc-add');
     Route::post('/lead/json/location/update/{loc_id}', 'LeadLocationController@ajaxLocationUpdate')->name('lead.ajax-loc-update');

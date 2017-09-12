@@ -539,6 +539,9 @@ function laraRoute(routeName) {
     case 'master.lead.overlay-log-history':
     case 'lead.overlay-log-history':
       return '/lead/json/log/history/'; // + lead-id
+    // HOME
+    case 'home.overlay-alert-mod':
+      return '/home/json/alert/mod/'; 
 
     case 'master.lead.overlay-loc-new':
     case 'lead.overlay-loc-new':

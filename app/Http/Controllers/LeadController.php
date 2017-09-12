@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Agency;
 use App\Provider;
 use App\Traits\LeadTrait;
+use App\Traits\AlertTrait;
 use Collective\Html\FormFacade as Form;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Validator;
 class LeadController extends Controller
 {
   use LeadTrait;
+  use AlertTrait;
   /*
   * custom variable
   */
@@ -64,15 +66,14 @@ class LeadController extends Controller
     $log_src = $this->log_src.'@manage';
     $preapp = $request->get('preapp');
     $agency_id = dec_id($preapp->agency_id);
-
     $lead_id = dec_id($request->id);
+
     $lead = $this->getLead($lead_id, $agency_id);
     if (!$lead)
       return log_redirect('Lead Not found.', ['src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id]);
 
-    
-    $data = $this->leadReload($lead, $agency_id);
-    
+    $data = $this->leadReload($lead, $agency_id);    
+
     return view('leads.manage')
       ->with('preapp', $request->get('preapp'))
       ->with('data', $data)
@@ -553,11 +554,6 @@ class LeadController extends Controller
     return $this->traitFollowerMod($request, route('lead.ajax-follower-update', ['lead_id'=> $request->lead_id]));
   }
 
-  public function overlayAlertMod(Request $request)
-  {
-    return $this->traitAlertMod($request, route('lead.ajax-alert-send', ['lead_id' => $request->lead_id]));
-  }
-
   /**
   * Action: update lead x followers (agent and/or provider-contacts) => output data in JSON.
   *  use LeadTrait->traitFollowerUpdate()
@@ -567,10 +563,16 @@ class LeadController extends Controller
     return $this->traitFollowerUpdate($request);
   }
 
-// Action update alert list
+  // Action alert list
   public function ajaxAlertSend(Request $request)
   {
-    return $this->traitAlertSend($request);
+    return $this->traitAlertSend($request, route('lead.manage', ['id'=> $request->id]));
+  }
+  public function overlayAlertMod(Request $request)
+  {
+    $lead_id = dec_id($request->id);
+    $user_ids = $this->getFollowersId($lead_id);
+    return $this->traitAlertMod($request, $user_ids, 'leads.form-alert');
   }
 
   /**

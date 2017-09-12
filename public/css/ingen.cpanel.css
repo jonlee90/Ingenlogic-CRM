@@ -979,15 +979,52 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
   font-feature-settings: 'liga';
 }
 .lead-log-history .tag-log-corrected,
- .lead-log-history .tag-log-system { 
+.lead-log-history .tag-log-system { 
   position: absolute; top: 0; right: 0;
   padding: 3px 8px; border-radius: 3px;
   background: #999; color: white;
 }
-.tag-log-alarm {
+
+.log-alarm-auto {
   position: absolute;
   right: 65px;
 }
+.log-alarm-user {
+  position: absolute;
+  right: 24px;
+}
+.alert-container {
+  border: 1px solid black;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+.alert-link-container {
+  width: 5%;
+}
+.alert-link-container .outer-link{
+  display: table;
+  height: 100%;
+  width: 100%;
+  vertical-align: middle;
+}
+.alert-link-container .inner-link {
+  display: table-cell;
+  vertical-align: middle;
+}
+.alert-content-container {
+  width: 75%;
+}
+.a_name, .alert-link-container, .alert-content-container {
+  display: inline-block;
+}
+.btn-go-lead {
+  font-size: 28px;
+}
+.btn-view-alerts {
+  margin: 5px 0px 20px!important;
+}
+
 .lead-log-history .tag-log-corrected::before { content: "corrected"; }
 .lead-log-history .tag-log-system::before { content: "system"; }
 .lead-log-history .log-msg + .log-detail { margin-top: 10px; }

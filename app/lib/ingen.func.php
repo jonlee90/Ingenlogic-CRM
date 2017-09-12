@@ -168,7 +168,7 @@ function log_write($msg, $vars = [], $severe_lv = NULL) {
 *************************************************************/
 function log_redirect($msg, $vars, $severe_lv ='err', $link = NULL) {
 	log_write($msg, $vars, $severe_lv);
-	session()->put('toast_msg', '<span class="err">'.$msg.'</err>');
+	session()->put('toast_msg', '<span class="err">'.$msg.'</span>');
 	
 	if ($link === NULL)
 		return redirect()->back()
@@ -186,7 +186,7 @@ function log_redirect($msg, $vars, $severe_lv ='err', $link = NULL) {
 * @return return value of Redirect::to
 **/
 function msg_redirect($msg, $link = NULL) {
-	session()->put('toast_msg', '<span class="info">'.$msg.'</err>');
+	session()->put('toast_msg', '<span class="info">'.$msg.'</span>');
 	
 	if ($link === NULL)
 		return redirect()->back();

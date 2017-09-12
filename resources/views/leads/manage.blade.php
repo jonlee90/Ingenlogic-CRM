@@ -1225,10 +1225,9 @@ window.aLeadManage = function() {
     }); // END: reqAjax
     overlay.open();
   });
-  $(document).on('click', '.tag-log-alarm', function() {
+  $(document).on('click', '.btn-log-alarm', function() {
       var userId = [];
       var logId = $(this).find('.log-id').val();
-      console.log(logId);
       $('.follower-id').each(function() {
         userId.push($(this).val());
       });
@@ -1241,11 +1240,41 @@ window.aLeadManage = function() {
       reqAjax({
         url: laraRoute('lead.overlay-alert-mod') + encLeadId,
         method: 'GET', 
-        data: { users: userId, log: logId },
+        data: { users: userId, log: logId, alertType: 1 },
         fnSuccess: fnFillContainerChange,
         fnFail: function(json) { alertUser(json.msg); overlay.close(); },
       }); // END: reqAjax
       overlay.open();  
+  });
+  $(document).on('click', '.alert-read', function(e) {
+    e.stopPropagation();
+
+    $(this).prop('checked', $(this).prop('checked'));
+
+    if(!$(this).prop('checked')) {
+      $('.alert-checkall').prop('checked', false);
+    }
+  });
+  $(document).on('click', '.alert-user-row', function() {
+    var checkedValue = $(this).find('.alert-read');
+    checkedValue.prop('checked', !checkedValue.prop('checked'));
+
+    if(!checkedValue.prop('checked')) {
+      $('.alert-checkall').prop('checked', false);
+    }
+  });
+  $(document).on('click', '.alert-checkall', function() {
+    var status;
+    var checked = $(this).prop('checked');
+    if(checked) {
+        status = true;
+    }else {
+      status = false;
+    }
+    $('.alert-read').each(function() {
+      var checkedValue = $(this);
+      checkedValue.prop('checked', status);
+    });
   });
   // ***** control panel: customer and salesperson *****
   $('.btn-customer-mod').click(function() {
