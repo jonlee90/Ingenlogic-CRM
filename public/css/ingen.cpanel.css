@@ -532,7 +532,7 @@ table thead th { border-width: 3px 1px; }
 table tr:nth-child(2n) td { background: #f7f7f7; }
 table tbody td { min-height: 23px; }
 table tbody tr:hover td { background: #e0e0e0; }
-table tbody td.not-found { padding: 10px; color: #f00; }
+table tbody td.not-found, .not-found { padding: 10px; color: #f00; }
 @media screen and (max-width: 700px) {
   table:not(.no-responsive), table:not(.no-responsive) tbody, table:not(.no-responsive) tr,
    table:not(.no-responsive) th, table:not(.no-responsive) td { display: block; }

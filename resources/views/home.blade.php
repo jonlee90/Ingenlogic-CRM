@@ -215,7 +215,7 @@ if ($myMsgReplyCount >0) {
       <?php
       $n = count($row_msgs);
       if ($n <1)
-        echo '<tr><td colspan="9" class="not-found">* 0 Messages found.</td></tr>';
+        echo '<tr><td colspan="9" class="not-found">* 0 Alerts found.</td></tr>';
 
       for ($i=0; $i<$n; $i++) {
         $r = $row_msgs[$i];
