@@ -38,7 +38,7 @@
           </div>
         @endforeach
       @else 
-        <tr><td class="not-found">* 0 Messages found.</td></tr>
+        <p class="not-found">* 0 Messages found.</p>
       @endif
     </div>
   </div>
