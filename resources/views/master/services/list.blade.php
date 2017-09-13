@@ -28,20 +28,24 @@
 function mServiceList() {
   var overlay = new ingenOverlay('overlay-pane');
 
-  openDataTable('#tbl-svc-list', "{{ route('master.datatables.services') }}", { _token: "{{ csrf_token() }}" }, function() {
-    $('.btn-mod-item').click(function() {
-      var $frm = $(this).closest('form');
+  openDataTable({
+    tblSelector: '#tbl-svc-list', url: "{{ route('master.datatables.services') }}",
+    data: { _token: "{{ csrf_token() }}" },
+    drawCallbackFn: function() {
+      $('.btn-mod-item').click(function() {
+        var $frm = $(this).closest('form');
 
-      overlay.setTitle('Update Service');
-      overlay.openAjax({ url: $frm.prop('action').replace('service/delete/','service/json/mod/'), data: {}, method: 'GET' });
-    });
-    $('.btn-del-item').click(function() {
-      var $frm = $(this).closest('form');
-      confirmUser("Do you want to delete the service? You cannot undo this.",
-        function() {
-          submitFrm($frm.get(0));
-        }, "Delete Service");
-    });
+        overlay.setTitle('Update Service');
+        overlay.openAjax({ url: $frm.prop('action').replace('service/delete/','service/json/mod/'), data: {}, method: 'GET' });
+      });
+      $('.btn-del-item').click(function() {
+        var $frm = $(this).closest('form');
+        confirmUser("Do you want to delete the service? You cannot undo this.",
+          function() {
+            submitFrm($frm.get(0));
+          }, "Delete Service");
+      });
+    }
   });
   $('.btn-new-item').click(function() {
     overlay.setTitle('New Service');

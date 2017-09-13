@@ -40,6 +40,7 @@
 .agent-ratio .col-n input { width: 100%; }
 .agent-ratio .col-n:nth-child(2) { width: 20px; text-align: center; font-size: 0.75rem; }
 
+
 /***** predefined-service list/view/edit *****/
 .tbl-svc-list { width: 600px; }
 .tbl-svc-list tbody td { white-space: nowrap; }
@@ -47,6 +48,7 @@
 .tbl-svc-list tr.parent td:nth-child(2) { color: #387ef5; font-weight: bold; }
 .tbl-svc-list tr:not(.parent) td:nth-child(3) { padding-left: 20px; }
 .tbl-svc-list th:nth-child(1) { width: 60px; }
+
 
  /***** leads: agency/manager list  *****/
 .wrapper.lead-management .lead-control-account .ctrl-commission ul { margin-bottom: 10px; list-style: none; }
@@ -95,6 +97,107 @@
 #overlay-pane .tbl-lead-commission input { min-width: 50px; width: calc(100% - 30px); border: 0; border-radius: 0; text-align: right; }
 #overlay-pane .tbl-lead-commission tbody.tbody-fill tr.btns td { padding: 5px 5px 20px; text-align: center; font-size: 12px; }
 #overlay-pane .tbl-lead-commission tbody.tbody-fill tr.btns button { margin: 0; }
+
+
+ /***** commission-accounts *****/
+.tbl-comm-accnt-share { width: 800px; }
+.tbl-comm-accnt-share thead th:nth-child(1) { width: 30px; }
+.tbl-comm-accnt-share thead .btn-comm-assign { color: #333; line-height: 16px; }
+.tbl-comm-accnt-share thead .btn-comm-assign:hover { color: #0054b0; }
+.tbl-comm-accnt-share tbody td:nth-child(1) { text-align: center; }
+.tbl-comm-accnt-share tbody td:nth-child(4), 
+.tbl-comm-accnt-share tbody td:nth-child(5) { padding: 0; }
+.tbl-comm-accnt-share tbody td:nth-child(4)::after, 
+.tbl-comm-accnt-share tbody td:nth-child(5)::after {
+  content: '%'; float: right; width: 30px; text-align: center; background: #eee; border-left: 1px solid #ccc; line-height: 29px; box-sizing: border-box;
+}
+.tbl-comm-accnt-share tbody td:nth-child(4) input, 
+.tbl-comm-accnt-share tbody td:nth-child(5) input { min-width: auto; width: calc(100% - 30px); border: 0; }
+.tbl-comm-accnt-share tr td { background: #fff !important; }
+.tbl-comm-accnt-share tr:nth-child(2n) td { background: #f7f7f7 !important; }
+
+.comm-accnt-address h3 { margin-bottom: 20px; }
+
+.overlay-comm-accnt-prov h2 { margin-bottom: 10px; }
+.overlay-comm-accnt-prov .tbl-accnt-provider-available { max-width: 600px; }
+.overlay-comm-accnt-prov .tbl-accnt-provider-available thead th:first-child { width: 50px; }
+.overlay-comm-accnt-prov .tbl-accnt-provider-available tbody td:first-child { text-align: center; }
+
+.tbl-comm-accnt-prods thead th:nth-child(1) { width: 50px; }
+.tbl-comm-accnt-prods thead th:nth-child(2),
+ .tbl-comm-accnt-prods thead th:nth-child(3) { min-width: 120px; }
+.tbl-comm-accnt-prods thead th:nth-child(4) { min-width: 180px; }
+.tbl-comm-accnt-prods thead th:nth-child(5),
+ .tbl-comm-accnt-prods thead th:nth-child(6),
+ .tbl-comm-accnt-prods thead th:nth-child(7) { width: 100px; }
+.tbl-comm-accnt-prods thead th:nth-child(8) { width: 50px; }
+.tbl-comm-accnt-prods thead th:nth-child(9),
+ .tbl-comm-accnt-prods thead th:nth-child(10) { width: 120px; }
+.tbl-comm-accnt-prods thead .btn-prod-add { line-height: 16px; color: #333; }
+.tbl-comm-accnt-prods thead .btn-prod-add:hover { color: #0054b0; }
+.tbl-comm-accnt-prods .cell-input { padding: 0; }
+.tbl-comm-accnt-prods .cell-input.commission::after { content: '%'; float: right; width: 16px; text-align: center; line-height: 23px; }
+.tbl-comm-accnt-prods .cell-input.money::before { width: 16px; margin: 0; text-align: center; line-height: 23px; }
+.tbl-comm-accnt-prods .cell-input input { min-width: auto; width: 100%; height: 23px; padding: 3px 5px; border: 0; background: none; }
+.tbl-comm-accnt-prods .cell-input input:not([name="prod_memo[]"]) { text-align: right; }
+.tbl-comm-accnt-prods .cell-input.commission input,
+.tbl-comm-accnt-prods .cell-input.money input { width: calc(100% - 16px); }
+.tbl-comm-accnt-prods .mrc-subtotal,
+ .tbl-comm-accnt-prods .nrc-subtotal { text-align: right; }
+.tbl-comm-accnt-prods .mrc-subtotal::before,
+ .tbl-comm-accnt-prods .nrc-subtotal::before { content: '$'; float: left; margin: 0; }
+.tbl-comm-accnt-prods .nrc .cell-input.commission input { display: none; }
+.tbl-comm-accnt-prods .nrc .cell-input.commission::after { content: '-'; width: 100%; }
+.tbl-comm-accnt-prods tfoot td { padding: 0 5px 0 0; vertical-align: middle; text-align: right; }
+.tbl-comm-accnt-prods tfoot td:first-child { padding-right: 20px; }
+.tbl-comm-accnt-prods tfoot td label { float: left; width: 30px; line-height: 30px; border-right: 1px solid #ccc; background: #eee; }
+.tbl-comm-accnt-prods tfoot .cell-nrc,
+ .tbl-comm-accnt-prods tfoot .cell-mrc { line-height: 30px; }
+ 
+.overlay-container-change-wrapper.overlay-comm-accnt-share .container-change { height: calc(100% - 120px); }
+.overlay-container-change-wrapper.overlay-comm-accnt-share .container-change h2 { margin-bottom: 10px; }
+.overlay-container-change-wrapper.overlay-comm-accnt-share .container-change + .btn-group::before { 
+  content: ''; display: block; width: calc(100% - 30px); height: 1px; margin: auto; border-top: 1px solid #ddd;
+}
+.overlay-container-change-wrapper.overlay-comm-accnt-share .container-change + .btn-group { margin: 20px 0 0; }
+.overlay-container-change-wrapper.overlay-comm-accnt-share .container-change + .btn-group button { margin: 10px 0 0; }
+.overlay-container-change-wrapper.overlay-comm-accnt-share .container-change + .btn-group::after { display: none; }
+.overlay-container-change-wrapper .container-change.agency .list-comm-accnt-manager { display: none; }
+.overlay-container-change-wrapper .container-change.manager .list-comm-accnt-agency { display: none; }
+.overlay-container-change-wrapper.overlay-comm-accnt-share .container-change table { width: 500px; }
+.overlay-container-change-wrapper.overlay-comm-accnt-share .container-change table thead th:first-child { width: 30px; }
+
+.overlay-comm-accnt-prod .commission-rates { display: none; margin-top: 8px; }
+.overlay-comm-accnt-prod input[name=mrc]:checked ~ .commission-rates { display: block; }
+
+#overlay-pane .overlay-comm-accnt-prod .overlay-list-frame { min-height: auto; }
+
+ /***** commission-accounts: view *****/
+.panel-comm-accnt-view h2 .popup-base,
+ .panel-comm-accnt-view h3 .popup-base { display: inline-block; margin-left: 5px; }
+.panel-comm-accnt-view h2 .popup-base .md { line-height: 24px; }
+.panel-comm-accnt-view h3 .popup-base .md { line-height: 20px; }
+.panel-comm-accnt-view .tbl-comm-share { width: 800px; }
+.panel-comm-accnt-view .tbl-comm-share thead th:nth-child(1),
+ .panel-comm-accnt-view .tbl-comm-share thead th:nth-child(2) { min-width: 200px; }
+.panel-comm-accnt-view .tbl-comm-share thead th:nth-child(3),
+ .panel-comm-accnt-view .tbl-comm-share thead th:nth-child(4),
+ .panel-comm-accnt-view .tbl-comm-share thead th:nth-child(5) { width: 120px; }
+.panel-comm-accnt-view .tbl-comm-share td:nth-child(3),
+ .panel-comm-accnt-view .tbl-comm-share td:nth-child(4),
+ .panel-comm-accnt-view .tbl-comm-share td:nth-child(5) { text-align: right; }
+
+.overlay-container-change-wrapper.overlay-comm-accnt-view-share h2 { margin-bottom: 10px; }
+.overlay-container-change-wrapper.overlay-comm-accnt-view-share .container-change { height: auto; padding: 0; overflow: initial; }
+.overlay-container-change-wrapper.overlay-comm-accnt-view-share .btn-group:last-child { margin: 0; }
+.overlay-container-change-wrapper.overlay-comm-accnt-view-share .btn-group:last-child::after { display: none; }
+.overlay-container-change-wrapper.overlay-comm-accnt-view-share .container-change table { width: 500px; }
+.overlay-container-change-wrapper.overlay-comm-accnt-view-share .container-change table thead th:first-child { width: 30px; }
+
+.overlay-comm-accnt-view-prov h2 { margin-bottom: 10px; }
+.overlay-comm-accnt-view-prov .tbl-accnt-provider-available { width: 600px; margin-bottom: 10px; }
+.overlay-comm-accnt-view-prov .tbl-accnt-provider-available thead th:first-child { width: 40px; }
+.overlay-comm-accnt-view-prov .tbl-accnt-provider-available tbody td:first-child { padding: 0; text-align: center; }
 
 
 @media screen and (max-width: 700px) {

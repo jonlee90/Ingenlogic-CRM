@@ -32,7 +32,7 @@ Route::group(['middleware' => ClearCache::class], function () {
   /**
    * ******************************************************* master (admin) page *******************************************************
    */
-  Route::group(['domain' => 'master.crm.app', 'middleware' => MasterPreapp::class], function () {
+  Route::group(['domain' => 'master.crm.ingenlogic.com', 'middleware' => MasterPreapp::class], function () {
     Route::get('/', 'Master\MasterHomeController@index')->name('master.index');
     Route::get('/home', 'Master\MasterHomeController@index')->name('master.home');
 
@@ -59,6 +59,10 @@ Route::group(['middleware' => ClearCache::class], function () {
 
     Route::get('/projects', 'Master\MasterProjectController@list'); // project.list
     Route::get('/project/manage/{id}', 'Master\MasterProjectController@manage')->name('master.project.manage');
+
+    Route::get('/accounts', 'Master\MasterProjectController@list'); // project.list
+    Route::get('/account/new/{quote_id?}', 'Master\MasterAccountController@new')->name('master.account.new');
+    Route::get('/account/view/{id}', 'Master\MasterAccountController@view')->name('master.account.view');
 
     /**
      * list of FORM (put/post/delete) action for DataTables.js
@@ -116,6 +120,14 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/project/json/keep/product/{accnt_id}', 'Master\MasterProjectController@overlayProductMod')->name('master.project.overlay-keep-prod');
     Route::get('/project/json/cancel/date/{accnt_id}', 'Master\MasterProjectController@overlayCancelDates')->name('master.project.overlay-cancel-date');
     Route::get('/project/json/signed/date/{quote_id}', 'Master\MasterProjectController@overlaySignedDates')->name('master.project.overlay-sign-date');
+
+    Route::get('/account/json/commission', 'Master\MasterAccountController@overlayCommission')->name('master.account.overlay-commission');
+    Route::get('/account/json/provider', 'Master\MasterAccountController@overlayProvider')->name('master.account.overlay-provider');
+    Route::get('/account/json/product/{prov_id}', 'Master\MasterAccountController@overlayProduct')->name('master.account.overlay-prod');
+    Route::get('/account/json/commission/mod/{accnt_id}', 'Master\MasterAccountController@overlayCommissionMod')->name('master.account.overlay-commission-mod');
+    Route::get('/account/json/provider/mod/{accnt_id}', 'Master\MasterAccountController@overlayProviderMod')->name('master.account.overlay-provider-mod');
+    Route::get('/account/json/product/new/{accnt_id}', 'Master\MasterAccountController@overlayProductNew')->name('master.account.overlay-prod-new');
+    Route::get('/account/json/product/mod/{prod_id}', 'Master\MasterAccountController@overlayProductMod')->name('master.account.overlay-prod-mod');
 
     /**
      * list of AJAX functions
@@ -215,6 +227,10 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::post('/project/signed/complete/{quote_id}', 'Master\MasterProjectController@signedComplete'); // project.sign-complete
     Route::post('/project/signed/complete/undo/{quote_id}', 'Master\MasterProjectController@signedCompleteUndo'); // project.sign-complete-undo
     Route::delete('/project/signed/revert/{quote_id}', 'Master\MasterProjectController@signedRevert'); // project.sign-revert
+
+    Route::put('/account/create', 'Master\MasterAccountController@create')->name('master.account.create');
+    Route::post('/account/update/commission/{accnt_id}', 'Master\MasterAccountController@updateCommission')->name('master.account.update-commission');
+    Route::post('/account/update/provider/{accnt_id}', 'Master\MasterAccountController@updateProvider')->name('master.account.update-provider');
   });
 
   /**
@@ -242,7 +258,6 @@ Route::group(['middleware' => ClearCache::class], function () {
     
     Route::get('/salespersons', 'SalespersonController@list')->name('salesperson.list');
     */
-
     Route::get('/leads', 'LeadController@list')->name('lead.list');
     Route::get('/lead/new', 'LeadController@new')->name('lead.new');
     Route::get('/lead/manage/{id}/{alert?}', 'LeadController@manage')->name('lead.manage');
@@ -288,7 +303,6 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::get('/lead/json/log/mod/{log_id}', 'LeadController@overlayLogMod')->name('lead.overlay-log-mod');
     Route::get('/lead/json/log/history/{lead_id}', 'LeadController@overlayLogHistory')->name('lead.overlay-log-history');
 
-
     Route::get('/lead/json/location/new/{lead_id}', 'LeadLocationController@overlayLocationNew')->name('lead.overlay-loc-new');
     Route::get('/lead/json/location/mod/{loc_id}', 'LeadLocationController@overlayLocationMod')->name('lead.overlay-loc-mod');
     Route::get('/lead/json/location/file/{loc_id}', 'LeadController@overlayLocationFiles')->name('lead.overlay-loc-file');
@@ -323,13 +337,6 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::delete('/lead/json/follower/provider/delete/{lead_id}/{order_no}', 'LeadController@ajaxFollowerProviderDelete')->name('lead.ajax-follower-provider-delete');
     Route::put('/lead/json/log/add/{lead_id}', 'LeadController@ajaxLogAdd')->name('lead.ajax-log-add');
     Route::post('/lead/json/log/correct/{log_id}', 'LeadController@ajaxLogCorrect')->name('lead.ajax-log-correct');
-
-    // ALERT 
-    Route::post('/lead/ajaxAlertSend/{id}', 'LeadController@ajaxAlertSend')->name('lead.ajax-alert-send');
-    Route::get('/home/json/alert/mod', 'HomeController@ajaxAlertGet')->name('home.overlay-alert-mod');   
-    Route::get('/alert/manage/{id}/{type}/{alert?}', 'AlertController@manage')->name('alert.manage');
-    Route::get('/lead/json/alert/mod/{id}', 'LeadController@overlayAlertMod')->name('lead.overlay-alert-mod');
-
 
     Route::put('/lead/json/location/add/{lead_id}', 'LeadLocationController@ajaxLocationAdd')->name('lead.ajax-loc-add');
     Route::post('/lead/json/location/update/{loc_id}', 'LeadLocationController@ajaxLocationUpdate')->name('lead.ajax-loc-update');
@@ -395,5 +402,12 @@ Route::group(['middleware' => ClearCache::class], function () {
     Route::post('/lead/update/{id}', 'LeadController@update')->name('lead.update');
     Route::delete('/lead/delete/{id}', 'LeadController@delete')->name('lead.delete');
     */
+    /*** Jon code ***/
+    // ALERT 
+    Route::post('/lead/ajaxAlertSend/{id}', 'LeadController@ajaxAlertSend')->name('lead.ajax-alert-send');
+    Route::get('/home/json/alert/mod', 'HomeController@ajaxAlertGet')->name('home.overlay-alert-mod');   
+    Route::get('/alert/manage/{id}/{type}/{alert?}', 'AlertController@manage')->name('alert.manage');
+    Route::get('/lead/json/alert/mod/{id}', 'LeadController@overlayAlertMod')->name('lead.overlay-alert-mod');
+
   });
 });

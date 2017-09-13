@@ -329,7 +329,7 @@ class MasterProviderController extends Controller
 
     $prov = Provider::find($prov_id);
     if (!$prov)
-      return log_redirect('Provider Not found.', ['src'=> $log_src, 'provider-id'=> $prov_id]);
+      return log_ajax_err('Provider Not found.', ['src'=> $log_src, 'provider-id'=> $prov_id]);
 
 
 		$html_output = '

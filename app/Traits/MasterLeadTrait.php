@@ -894,9 +894,17 @@ trait MasterLeadTrait
       '*'=> 'Please enter a valid Commission Rate',
     ]);
     if ($v->fails()) {
-      return redirect()->back()
-        ->withErrors($v)
-        ->withInput();
+      $errs = $v->errors()->all();
+      $errs = [];
+      // filter out duplicate error message(s) - since all fields are array, same error can occur multiple times
+      foreach ($errs_tmp as $r) {
+        if (!in_array($r, $errs))
+          $errs[] = $r;
+      }
+      $msg = '';
+      foreach ($errs as $err)
+        $msg .= '<p>'.$err.'</p>';
+      return err_redirect($msg);
     }
       
     
@@ -1373,14 +1381,13 @@ trait MasterLeadTrait
 
     // list of attached files. if file not exists, remove from DB
     $files = [];
-    $total_f_size = 0;
     $db_rows = DB::table('lead_location_files')->whereRaw(" location_id =:loc_id AND lead_id =:lead_id ", [$loc_id, $lead_id])->get();
     if ($db_rows) {
       foreach ($db_rows as $f) {
         $f_path = public_path().'/upload/loc/'.$f->id.'/'.$f->url;
         if (file_exists($f_path)) {
+          $f->size = filesize($f_path);
           $files[] = $f;
-          $total_f_size += filesize($f_path);
         } else
           DB::table('lead_location_files')->where('id', $f->id)->delete();
       }
@@ -1390,7 +1397,6 @@ trait MasterLeadTrait
       view('leads.form-loc-files')
         ->with('loc_id', $loc_id)
         ->with('files', $files)
-        ->with('total_f_size', $total_f_size)
         ->with('is_project', $is_project)
         ->render().'
       
@@ -1447,11 +1453,11 @@ trait MasterLeadTrait
     $log_detail = '<ul class="lead-log-files">';
     foreach ($files as $f) {
       $f_name = $f->getClientOriginalName();
-      $f_size = $f->getSize();
+      $f_size = $f->getClientSize();
 
       if ($f_size <= 0)
         return log_redirect('One of the Uploaded File has a file size of 0 byte.', [
-          'src'=> $log_src, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'file'=> $f_name, ]);
+          'src'=> $log_src, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'file'=> $f_name, 'size'=> $f_size, ]);
       $total_f_size += $f_size;
       
       $log_detail .= '<li>'.$f_name.'</li>';

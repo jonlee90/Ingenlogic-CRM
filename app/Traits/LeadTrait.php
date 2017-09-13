@@ -481,7 +481,7 @@ trait LeadTrait
 			'html'=> $html_output
     ]);
   }
-
+  
   
   /**
   * Action: update lead x followers (agent and/or provider-contacts) => output data in JSON.
@@ -624,7 +624,7 @@ trait LeadTrait
     return $this->jsonReload($lead_id, $agency_id);
   }
   /**
-  * traitFollowerUpdate Action: delete lead x followers (agent) => output data in JSON.
+  * AJAX Action: delete lead x followers (agent) => output data in JSON.
   *
   * @param $request
   * @param $request->lead_id: lead ID encoded
@@ -731,14 +731,13 @@ trait LeadTrait
 
     // list of attached files. if file not exists, remove from DB
     $files = [];
-    $total_f_size = 0;
     $db_rows = DB::table('lead_location_files')->whereRaw(" location_id =:loc_id AND lead_id =:lead_id ", [$loc_id, $lead_id])->get();
     if ($db_rows) {
       foreach ($db_rows as $f) {
         $f_path = public_path().'/upload/loc/'.$f->id.'/'.$f->url;
         if (file_exists($f_path)) {
+          $f->size = filesize($f_path);
           $files[] = $f;
-          $total_f_size += filesize($f_path);
         } else
           DB::table('lead_location_files')->where('id', $f->id)->delete();
       }
@@ -748,7 +747,6 @@ trait LeadTrait
       view('leads.form-loc-files')
         ->with('loc_id', $loc_id)
         ->with('files', $files)
-        ->with('total_f_size', $total_f_size)
         ->with('is_project', $is_project)
         ->render().'
       
@@ -806,11 +804,11 @@ trait LeadTrait
     $log_detail = '<ul class="lead-log-files">';
     foreach ($files as $f) {
       $f_name = $f->getClientOriginalName();
-      $f_size = $f->getSize();
+      $f_size = $f->getClientSize();
 
       if ($f_size <= 0)
         return log_redirect('One of the Uploaded File has a file size of 0 byte.', [
-          'src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'file'=> $f_name, ]);
+          'src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'file'=> $f_name, 'size'=> $f_size, ]);
       $total_f_size += $f_size;
       
       $log_detail .= '<li>'.$f_name.'</li>';

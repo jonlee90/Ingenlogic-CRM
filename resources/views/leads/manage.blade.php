@@ -294,7 +294,6 @@ if ($lead->quote_requested)
 <script src="/js/ingen.calendar.js"></script>
 <script src="/js/jquery.dataTables.min.js"></script>
 <script>
- 
 window.aLeadManage = function() {
   var $win = $(window);
   var resizeControlPanel = function() {
@@ -515,10 +514,6 @@ window.aLeadManage = function() {
       method: 'GET', data: {}
     });
   }
-  
- 
-
-
   var fnReloadLeadHandlers = function() {
     $sectionLeadControlAccount.find('.btn-follow-del').click(fnFollowerDel);
     $sectionLeadControlAccount.find('.btn-log-mod').click(fnLogCorrect);
@@ -561,7 +556,7 @@ window.aLeadManage = function() {
       */
     $sectionLeadControlAccount.find('.ctrl-follower .ctrl-content').html('').html(json.followerHTML);
     $locSelect.html('').html(json.locOptHTML);
-    $sectionLeadControlAccount.find('.ctrl-logs .ctrl-content ul').html('').html(json.logHTML);
+    $sectionLeadControlAccount.find('.ctrl-logs .ctrl-content').html('').html(json.logHTML);
 
     var $locList = $('section.lead-frame-content .list-locations');
     $locList.html('').html(json.locHTML);
@@ -757,24 +752,29 @@ window.aLeadManage = function() {
       
       if (this.files.length >0) {
         // validate: file size must be greater than 0 byte, 10 MB limit
-        var size_limit = 10; // MB
-        var total_size = parseInt( $('#overlay-pane .lead-loc-list-files').attr('data-size') );
-        total_size = (total_size >0)?  total_size : 0;
+        var sizeLimit = 10; // MB
 
-        // validate: valid image types
+        var totalByte = 0;
+        $('#overlay-pane .lead-loc-list-files > li').each(function() {
+          var sizeBytes = parseInt( $(this).attr('data-size') );
+          if (sizeBytes >=0)
+            totalByte += sizeBytes;
+        });
+
         for (var i=0; i<this.files.length; i++) {
           var f = this.files[i];
           
           if (f.size <= 0)
             return clearFile('File size must be greater than 0 byte.');
 
-          total_size += f.size;
-          if (total_size > size_limit  *1048576)
-            return clearFile("Total File size is limited to " + size_limit + " MB.");
+          totalByte += f.size;
+          if (totalByte > sizeLimit  *1048576)
+            return clearFile("Total File size is limited to " + sizeLimit + " MB.");
         }
+
         // add preview of uploaded files
         $wrapper.find('label.file-label').removeClass('empty');
-
+        
         var previewHTML = '';
         for (var i=0; i<this.files.length; i++)
           previewHTML += '<p>' + this.files[i].name + '</p>';
@@ -784,9 +784,9 @@ window.aLeadManage = function() {
     });
     $frmFile.submit(function(e) {
       e.preventDefault();
-      if ($(this).find('input[type=file]').get(0).files.length <1) {
+      if ($(this).find('input[type=file]').get(0).files.length <1)
         alertUser("Please select at least 1 file to upload.");
-      } else
+      else
         submitFrm(this);
     });
     $('#overlay-pane .lead-loc-list-files .btn-del-file').click(function() {
@@ -1093,6 +1093,29 @@ window.aLeadManage = function() {
       });
     });
   }
+  // log-new AND mod (=add new, corrected log)
+  window.aoLogAdd = function() {
+    $overlayPane.find('.wrapper-textarea textarea').on('input blur', function() { updateTextareaChr(this); });
+    $overlayPane.find('.frm-log').submit(function(e) {
+      e.preventDefault();
+      var $frm = $(this);
+      reqAjax({
+        url: $frm.prop('action'),
+        data: $frm.serializeArray(),
+        fnSuccess: function(json) {
+          fnReloadLead(json);
+          overlay.close();
+          toastUser('Log has been recorded.');
+        },
+      });
+    });
+  }
+  // overlay open: log-history
+  window.aoLogHistory = function() {
+    $overlayPane.find('.btn-log-mod').click(fnLogCorrect);
+  }
+
+  /*** Jon code ***/
   window.aoLeadAlert = function() {
     var fnDelRow = function() { $(this).closest('tr').fadeOut({complete: function() { $(this).remove(); }}); };
     
@@ -1132,27 +1155,6 @@ window.aLeadManage = function() {
         },
       });
     });
-  }
-  // log-new AND mod (=add new, corrected log)
-  window.aoLogAdd = function() {
-    $overlayPane.find('.wrapper-textarea textarea').on('input blur', function() { updateTextareaChr(this); });
-    $overlayPane.find('.frm-log').submit(function(e) {
-      e.preventDefault();
-      var $frm = $(this);
-      reqAjax({
-        url: $frm.prop('action'),
-        data: $frm.serializeArray(),
-        fnSuccess: function(json) {
-          fnReloadLead(json);
-          overlay.close();
-          toastUser('Log has been recorded.');
-        },
-      });
-    });
-  }
-  // overlay open: log-history
-  window.aoLogHistory = function() {
-    $overlayPane.find('.btn-log-mod').click(fnLogCorrect);
   }
   // END: window.(function name)
 
@@ -1213,18 +1215,17 @@ window.aLeadManage = function() {
         .append($('<div/>', {class: 'btn-group'}).append($btnAgent).append(' ').append($btnProv))
         .append($('<div/>', {class: 'container-change agent'}))
     );
-
-
     // by default open 'update provider'
     reqAjax({
       url: laraRoute('lead.overlay-follower-mod') + encLeadId,
-      method: 'GET', 
-      data: {},
+      method: 'GET', data: {},
       fnSuccess: fnFillContainerChange,
       fnFail: function(json) { alertUser(json.msg); overlay.close(); },
     }); // END: reqAjax
     overlay.open();
   });
+
+  /*** Jon code ***/
   $(document).on('click', '.btn-log-alarm', function() {
       var userId = [];
       var logId = $(this).find('.log-id').val();
@@ -1276,6 +1277,7 @@ window.aLeadManage = function() {
       checkedValue.prop('checked', status);
     });
   });
+
   // ***** control panel: customer and salesperson *****
   $('.btn-customer-mod').click(function() {
     overlay.setTitle('Update Customer');

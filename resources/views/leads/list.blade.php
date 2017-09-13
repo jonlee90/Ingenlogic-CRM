@@ -23,17 +23,12 @@
 @section('post_content_script')
 <script src="/js/jquery.dataTables.min.js"></script>
 <script>
-function aLdL1() {
-  openDataTable('#tbl-lead-list', laraRoute('datatables.leads'), { _token: "{{ csrf_token() }}" }, function() {
-    $('.btn-del-item').click(function() {
-      var $frm = $(this).closest('form');
-      confirmUser("Do you want to delete the service provider? You cannot undo this.",
-        function() {
-          submitFrm($frm.get(0));
-        }, "Delete Service Provider");
-    });
+function aLeadList() {
+  openDataTable({
+    tblSelector: '#tbl-lead-list', url: "{{ route('datatables.leads') }}",
+    data: { _token: "{{ csrf_token() }}" },
   });
 }
-aLdL1();
+aLeadList();
 </script>
 @endsection

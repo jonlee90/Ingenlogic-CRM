@@ -66,14 +66,14 @@ class LeadController extends Controller
     $log_src = $this->log_src.'@manage';
     $preapp = $request->get('preapp');
     $agency_id = dec_id($preapp->agency_id);
-    $lead_id = dec_id($request->id);
 
+    $lead_id = dec_id($request->id);
     $lead = $this->getLead($lead_id, $agency_id);
     if (!$lead)
       return log_redirect('Lead Not found.', ['src'=> $log_src, 'agency-id'=> $agency_id, 'lead-id'=> $lead_id]);
 
-    $data = $this->leadReload($lead, $agency_id);    
 
+    $data = $this->leadReload($lead, $agency_id);
     return view('leads.manage')
       ->with('preapp', $request->get('preapp'))
       ->with('data', $data)
@@ -108,12 +108,16 @@ class LeadController extends Controller
       'tel' => ['required', 'max:10', 'regex:/^\d{10}$/'],
       'tax_id' => ['nullable', 'regex:/^\d{2}-\d{7}$/'],
       'email' => 'nullable|email',
-      'state_id' => 'nullable|numeric',
-      'zip' => ['nullable', 'max:10', 'regex:/^\d{5}(-\d{4})?$/'],
+      'addr' => 'nullable|required_if:create_loc,1',
+      'city' => 'nullable|required_if:create_loc,1',
+      'state_id' => 'nullable|numeric|required_if:create_loc,1',
+      'zip' => ['nullable', 'max:10', 'required_if:create_loc,1', 'regex:/^\d{5}(-\d{4})?$/'],
     ], [
       'c_name.*'=> 'Customer Name is required.',
       'tel.*'=> 'Please enter the 10 digit Phone Number without dashes and spaces.',
       'tax_id.*'=> 'Please enter a valid Tax ID number (12-3456789 format).',
+      'addr.*' => 'Address is required if Create Location is checked',
+      'city.*' => 'City is required if Create Location is checked',
       'email.*'=> 'Please enter a valid Email Address.',
       'state_id.*'=> 'Invalid State ID entered.',
       'zip.*'=> 'Please use a valid US Zip code.',
@@ -147,13 +151,27 @@ class LeadController extends Controller
     DB::table('lead_relation_agency')->insert([ 'lead_id'=> $lead_id, 'agency_id' => $agency_id, 'agency'=> $agency->name, ]);
     DB::table('lead_relation_manager')->insert([ 'lead_id'=> $lead_id, 'user_id' => $manager->id, 'ch_manager'=> trim($manager->fname.' '.$manager->lname), ]);
 
+    $log_msg = '<p>New Lead has been created.</p><p>[Customer] '.$request->c_name.'</p>';
+    $log_vars = ['src'=> $log_src, 'agency-id'=> $agency_id, 'manager-id'=> $manager->id, 'lead-id'=> $lead_id, ];
+
+    // if create-location checker is checked: create new location with the same address
+    if ($request->create_loc) {
+      $loc_id = DB::table('lead_locations')->insertGetId([
+        'lead_id'=> $lead_id,
+        'name'=> 'New Location',
+        'addr' => $p_addr, 'addr2' => $p_addr2,
+        'city' => $p_city, 'state_id' => $p_state_id, 'zip' => $p_zip,
+      ]);
+      
+      $log_msg = '<p>New Lead has been created with Location.</p><p>[Customer] '.$request->c_name.'</p>';
+      $log_vars['location-id'] = $loc_id;
+    }
+
     
     // action SUCCESS: leave a log and redirect to view
-    $log_id = log_lead_values((object) [
-      'id' => $lead_id, 
-      'msg' => '<p>New Lead has been created.</p><p>[Customer] '.$request->c_name.'</p>'
-    ]);
-    log_write('New Lead Created.', ['src'=> $log_src, 'agency-id'=> $agency_id, 'manager-id'=> $manager->id, 'lead-id'=> $lead_id, 'log-id'=> $log_id, ]);
+    $log_id = log_lead_values((object) ['id' => $lead_id, 'msg' => $log_msg, ]);
+    $log_vars['log_id'] = $log_id;
+    log_write('New Lead Created.', $log_vars);
     return msg_redirect('The Lead has been created. Please continue with location and accounts.', route('lead.manage', ['id'=> enc_id($lead_id)]));
   }
   /**
@@ -399,7 +417,7 @@ class LeadController extends Controller
   * @param $vars (optional): array of additional output to include in JSON output (by default, empty)
   * @return JSON with HTML outputs
   **/
-  public function jsonReload ($lead_id, $agency_id, $vars = [])
+  protected function jsonReload ($lead_id, $agency_id, $vars = [])
   {
     $log_src = $this->log_src.'@jsonReload';
 
@@ -550,10 +568,8 @@ class LeadController extends Controller
   */
   public function overlayFollowerMod(Request $request)
   {
-    
     return $this->traitFollowerMod($request, route('lead.ajax-follower-update', ['lead_id'=> $request->lead_id]));
   }
-
   /**
   * Action: update lead x followers (agent and/or provider-contacts) => output data in JSON.
   *  use LeadTrait->traitFollowerUpdate()
@@ -562,19 +578,6 @@ class LeadController extends Controller
   {
     return $this->traitFollowerUpdate($request);
   }
-
-  // Action alert list
-  public function ajaxAlertSend(Request $request)
-  {
-    return $this->traitAlertSend($request, route('lead.manage', ['id'=> $request->id]));
-  }
-  public function overlayAlertMod(Request $request)
-  {
-    $lead_id = dec_id($request->id);
-    $user_ids = $this->getFollowersId($lead_id);
-    return $this->traitAlertMod($request, $user_ids, 'leads.form-alert');
-  }
-
   /**
   * AJAX Action: delete lead x followers (agent) => output data in JSON.
   *  use LeadTrait->traitFollowerUpdate()
@@ -616,5 +619,18 @@ class LeadController extends Controller
   public function ajaxLocationFileDelete(Request $request)
   {
     return $this->traitLocationFileDelete($request);
+  }
+
+  /** Jon code ***/
+  // Action alert list
+  public function ajaxAlertSend(Request $request)
+  {
+    return $this->traitAlertSend($request, route('lead.manage', ['id'=> $request->id]));
+  }
+  public function overlayAlertMod(Request $request)
+  {
+    $lead_id = dec_id($request->id);
+    $user_ids = $this->getFollowersId($lead_id);
+    return $this->traitAlertMod($request, $user_ids, 'leads.form-alert');
   }
 }

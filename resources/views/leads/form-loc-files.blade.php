@@ -3,7 +3,6 @@
 * required vars
 * @param $loc_id: location ID
 * @param $files: currently attached files
-* @param $total_f_size: total size (in bytes) of all attached files
 * @param $is_project: Laravel route name - form URL to submit for deleting attached file
 */
 
@@ -13,9 +12,9 @@ $frm_attach_route_name = ($is_project)?  'project.loc-file-attach' : 'lead.loc-f
 <div class="overlay-lead-loc-file">
   <h2>Attached Files</h2>
   
-  <ul class="lead-loc-list-files" data-size="{{ $total_f_size }}">
+  <ul class="lead-loc-list-files">
     @forelse ($files as $f)
-    <li>
+    <li data-size="{{ $f->size }}">
       {!! Form::open(['url'=> route($frm_del_route_name, ['file_id'=> enc_id($f->id)]), 'method'=> 'DELETE', ]) !!}
       <span class="popup-base">
         <i class="md s btn-del-file">close</i>

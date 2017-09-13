@@ -413,24 +413,27 @@ function reqAjax(json) {
  * openDataTable
  *  require: DataTable.js
  * 
- * @param tblSelector: jQuery selector of the table
- * @param srcUrl: url to get data from server-side 
- * @param addData: additional data to send to server-side
- * @param drawCallbackFn (optional): additional script to run
+ * @param json: {
+ *  tblSelector: jQuery selector of the table
+ *  url: url to get data from server-side 
+ *  data: additional data to send to server-side
+ *  drawCallbackFn (optional): additional script to run on each draw
+ *  additionalFn (optional): additional script to run after executing the function
+ * }
  * ***************************************************** */
-function openDataTable(tblSelector, srcUrl, addData, drawCallbackFn) {
+function openDataTable(json) {
   var $loadingOverlay;
   
-  $(tblSelector).DataTable({
+  $(json.tblSelector).DataTable({
     serverSide: true,
     pageLength: 30,
 		ordering: false,
     processing: true,
     autoWidth: false,
     ajax: {
-      url: srcUrl,
+      url: json.url,
       type: "GET",
-      data: addData,
+      data: json.data,
       error: function() {
         $('.form-submit-loading').fadeOut({complete: function() { $(this).remove(); }});
         alertUser('The system was unable to load the table.');
@@ -449,13 +452,15 @@ function openDataTable(tblSelector, srcUrl, addData, drawCallbackFn) {
       if ($loadingOverlay)
         $loadingOverlay.fadeOut({complete: function() { $(this).remove(); }});
       $(this).closest('.dataTables_wrapper').find('.dataTables_paginate').toggle(this.api().page.info().pages > 1);
-      
+  
+      // execute drawcallback scripts to run (if exists)
+      if (json.drawCallbackFn != undefined)
+        json.drawCallbackFn();
     }
   });
-  
   // execute additional scripts to run (if exists)
-  if (drawCallbackFn != undefined)
-    drawCallbackFn();
+  if (json.additionalFn != undefined)
+    json.additionalFn();
 }
 /** ********************************************************
  * scrollToTop
@@ -491,6 +496,7 @@ function laraRoute(routeName) {
       return '/datatables/projects/keep';
     case 'datatables.projects-cancel':
       return '/datatables/projects/cancel';
+      
     case 'master.provider.overlay-prod-new':
       return '/provider/json/product/new/'; // + provider-id
     case 'master.provider.overlay-prod-mod':
@@ -528,8 +534,6 @@ function laraRoute(routeName) {
     case 'master.lead.overlay-follower-mod':
     case 'lead.overlay-follower-mod':
       return '/lead/json/follower/mod/'; // + lead-id
-    case 'lead.overlay-alert-mod':
-      return '/lead/json/alert/mod/'; // + lead-id
     case 'master.lead.overlay-log-new':
     case 'lead.overlay-log-new':
       return '/lead/json/log/new/'; // + lead-id
@@ -539,6 +543,10 @@ function laraRoute(routeName) {
     case 'master.lead.overlay-log-history':
     case 'lead.overlay-log-history':
       return '/lead/json/log/history/'; // + lead-id
+      
+    /*** Jon code ***/
+    case 'lead.overlay-alert-mod':
+    return '/lead/json/alert/mod/'; // + lead-id
     // HOME
     case 'home.overlay-alert-mod':
       return '/home/json/alert/mod/'; 

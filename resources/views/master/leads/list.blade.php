@@ -24,19 +24,12 @@
 @section('post_content_script')
 <script src="/js/jquery.dataTables.min.js"></script>
 <script>
-function mLdL1() {
-  openDataTable('#tbl-lead-list', laraRoute('datatables.leads'), { _token: "{{ csrf_token() }}" }, function() {
-    /*
-    $('.btn-del-item').click(function() {
-      var $frm = $(this).closest('form');
-      confirmUser("Do you want to delete the service provider? You cannot undo this.",
-        function() {
-          submitFrm($frm.get(0));
-        }, "Delete Service Provider");
-    });
-    */
+function mLeadList() {
+  openDataTable({
+    tblSelector: '#tbl-lead-list', url: laraRoute('datatables.leads'),
+    data: { _token: "{{ csrf_token() }}" },
   });
 }
-mLdL1();
+mLeadList();
 </script>
 @endsection

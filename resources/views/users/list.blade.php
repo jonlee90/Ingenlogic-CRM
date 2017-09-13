@@ -27,14 +27,9 @@
 <script src="/js/jquery.dataTables.min.js"></script>
 <script>
 function aUserList() {
-  openDataTable('#tbl-user-list', "{{ route('datatables.users') }}", { _token: "{{ csrf_token() }}" }, function() {
-    $('.btn-close-item').click(function() {
-      var $frm = $(this).closest('form');
-      confirmUser("Do you want to delete the user? You cannot undo this.",
-        function() {
-          submitFrm($frm.get(0));
-        }, "Delete User");
-    });
+  openDataTable({
+    tblSelector: '#tbl-user-list', url: "{{ route('datatables.users') }}",
+    data: { _token: "{{ csrf_token() }}" },
   });
 }
 aUserList();

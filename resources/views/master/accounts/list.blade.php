@@ -1,20 +1,26 @@
 @extends('layouts.master')
 
-@section('title', "Users | ".SITE_TITLE." Control Panel v2")
+@section('title', "Providers | ".SITE_TITLE." Control Panel v2")
 
-@section('content')
-<a href="{{ route('master.user.new') }}"><input type="button" value="Add New User" /></a>
-  
+@section('wrapper_type', 'tbl-1200')
+
+@section('content')  
 <div class="panel block">
+  @if ($preapp->perm_prov_rec)
+  <a href="{{ route('master.provider.new') }}"><input type="button" value="Add New Provider" /></a>
+  @endif
+
   <div class="datatables-wrapper">
-    <table id="tbl-user-list" class="datatables-table">
+    <table id="tbl-provider-list" class="datatables-table tbl-provider-list">
       <thead>
         <th></th>
         <th>Mod</th>
-        <th>Email</th>
-        <th>Agency</th>
         <th>Name</th>
-        <th>Access LV</th>
+        <th>Address</th>
+        <th>Phone</th>
+        <th>Default Term</th>
+        <th>Default Spiff</th>
+        <th>Default Residual</th>
         <th>Status</th>
       </thead>
     </table>
@@ -25,9 +31,9 @@
 @section('post_content_script')
 <script src="/js/jquery.dataTables.min.js"></script>
 <script>
-function mUserList() {
+function mProviderList() {
   openDataTable({
-    tblSelector: '#tbl-user-list', url: "{{ route('master.datatables.users') }}",
+    tblSelector: '#tbl-provider-list', url: "{{ route('master.datatables.providers') }}",
     data: { _token: "{{ csrf_token() }}" },
     drawCallbackFn: function() {
       $('.btn-del-item').click(function() {
@@ -40,6 +46,7 @@ function mUserList() {
     }
   });
 }
-mUserList();
+// declare overlay as global var to be used in oVsE1()
+mProviderList();
 </script>
 @endsection

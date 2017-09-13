@@ -8,13 +8,13 @@
 <ul>
   @forelse ($logs as $log)
   <li class="<?=($log->is_corrected)? 'grayed':'' ?>">
-    
     <div class="clear-fix">
       <b>{{ $log->mod_user }}</b>
       <span class="popup-base {{($log->is_auto_gen) ? 'log-alarm-auto' : 'log-alarm-user'}}">
         <i class='fa-bell btn-log-alarm'>{{ Form::hidden('id', $log->id, ['class' => 'log-id']) }}</i>
         <div class="popup-tip"><div>Send Alert</div></div>
       </span>
+
       @if ($log->is_corrected)
       <div class="tag-log-corrected"></div>
 
@@ -45,5 +45,4 @@
   </li>
   @empty
   @endforelse
-
 </ul>

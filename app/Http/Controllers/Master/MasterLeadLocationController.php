@@ -708,11 +708,11 @@ class MasterLeadLocationController extends MasterLeadController
     $n_prods = count($request->prod);
     if (!($n_prods >0))
       return log_ajax_err('One or more Products are required.', [
-        'src'=>$log_src, 'agent-id'=> $agent_id, 'lead-id'=>$lead_id, 'location-id'=> $loc_id, 'account-id'=> $accnt_id
+        'src'=>$log_src, 'manager-id'=> $manager_id, 'lead-id'=>$lead_id, 'location-id'=> $loc_id, 'account-id'=> $accnt_id
       ]);
     if ($n_prods != count($request->svc) || $n_prods != count($request->memo) || $n_prods != count($request->price) || $n_prods != count($request->qty))
       return log_ajax_err('Form Input is misconfigured. Please contact the adminstrator.', [
-        'src'=>$log_src, 'agent-id'=> $agent_id, 'lead-id'=>$lead_id, 'location-id'=> $loc_id, 'account-id'=> $accnt_id
+        'src'=>$log_src, 'manager-id'=> $manager_id, 'lead-id'=>$lead_id, 'location-id'=> $loc_id, 'account-id'=> $accnt_id
       ]);
 
     // input validation
@@ -1180,9 +1180,9 @@ class MasterLeadLocationController extends MasterLeadController
   public function ajaxQuoteToggle (Request $request)
   {
     $log_src = $this->log_src.'@ajaxQuoteToggle';
-
     $preapp = $request->get('preapp');
     $me = Auth::user();
+    $manager_id = $preapp->manager_id;
     
     // validate: quote -> location -> lead exists
     $quote_id = dec_id($request->quote_id);
@@ -1196,15 +1196,15 @@ class MasterLeadLocationController extends MasterLeadController
       return log_ajax_err('Location Not found.', ['src'=>$log_src, 'location-id'=> $loc_id, 'quote-id'=> $quote_id]);
 
     $lead_id = $loc->lead_id;
-    $db_rows = DB::select(
-      " SELECT l.id
-          FROM leads l LEFT JOIN agents a ON l.agent_id =a.id
-            LEFT JOIN relation_agency_manager ma ON a.id =ma.agent_id
-          WHERE l.id =:lead_id AND (l.agent_id =0 OR ma.user_id =:auth_id OR :auth_lv >= :master_super_lv)  AND (l.master_rec =1 OR l.quote_requested =1)
-            LIMIT 1 
-    ", [$lead_id, $me->id, $preapp->lv, POS_LV_MASTER_SUPER]);
-    if (!$db_rows)
-      return log_ajax_err('Lead Not found.', ['src'=>$log_src, 'lead-id'=>$lead_id, 'location-id'=> $loc_id, 'quote-id'=> $quote_id]);
+    $lead = $this->getLead($lead_id, $manager_id);
+    if (!$lead)
+      return log_ajax_err('Lead Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, ]);
+
+    // get provider name for lead-logging
+    $prov = Provider::find($quote->provider_id);
+    if (!$prov)
+      return log_ajax_err('Provider Not found.', ['src'=> $log_src, 'manager-id'=> $manager_id, 'lead-id'=> $lead_id, 'location-id'=> $loc_id, 'quote-id'=> $quote_id]);
+
 
     $p_select = ($quote->is_selected)?  0 : 1;
 
@@ -1214,10 +1214,13 @@ class MasterLeadLocationController extends MasterLeadController
     ]);
     
     // action SUCCESS: leave a log and output JSON
-    log_write('Lead x Location x Quote toggled.', ['src'=> $log_src, 'lead-id'=> $lead_id, 'location-id'=>$loc_id, 'quote-id'=> $quote_id, 'toggle'=> $p_select]);
-		return json_encode([
-      'success'=>1, 'error'=>0, 'locId'=> enc_id($loc_id),
+    $log_select = ($p_select)?  'added to the Selected Quotes' : 'removed from the Selected Quotes';
+    $log_id = log_lead_values((object) [
+      'id' => $lead_id, 
+      'msg' => '<p>Quote has been '.$log_select.'</p><p>[Location] '.$loc->name.' x [Quote Provider] '.$prov->name.'</p>'
     ]);
+    log_write('Lead x Location x Quote toggled.', ['src'=> $log_src, 'lead-id'=> $lead_id, 'location-id'=>$loc_id, 'quote-id'=> $quote_id, 'toggle'=> $p_select]);
+    return $this->jsonReload($lead_id, $manager_id, ['locId'=> enc_id($loc_id)]);
   }
   /**
   * Action: update quote (agency spiff/residual rate, terms ONLY) => output data in JSON.

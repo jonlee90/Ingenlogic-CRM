@@ -32,14 +32,18 @@
 <script src="/js/jquery.dataTables.min.js"></script>
 <script>
 function mProviderList() {
-  openDataTable('#tbl-provider-list', "{{ route('master.datatables.providers') }}", { _token: "{{ csrf_token() }}" }, function() {
-    $('.btn-del-item').click(function() {
-      var $frm = $(this).closest('form');
-      confirmUser("Do you want to delete the provider? You cannot undo this.",
-        function() {
-          submitFrm($frm.get(0));
-        }, "Delete Provider");
-    });
+  openDataTable({
+    tblSelector: '#tbl-provider-list', url: "{{ route('master.datatables.providers') }}",
+    data: { _token: "{{ csrf_token() }}" },
+    drawCallbackFn: function() {
+      $('.btn-del-item').click(function() {
+        var $frm = $(this).closest('form');
+        confirmUser("Do you want to delete the provider? You cannot undo this.",
+          function() {
+            submitFrm($frm.get(0));
+          }, "Delete Provider");
+      });
+    }
   });
 }
 // declare overlay as global var to be used in oVsE1()

@@ -120,6 +120,10 @@ class MasterPreapp
     $preapp->perm_lead_rec =
     $preapp->perm_lead_mod =
     $preapp->perm_lead_del = ($rec->pos_lv >= POS_LV_MASTER_MANAGER || (POS_LV_CH_USER <= $rec->pos_lv && $rec->pos_lv <= POS_LV_CH_MANAGER));
+    $preapp->perm_account_rec =
+    $preapp->perm_account_mod = ($rec->pos_lv >= POS_LV_MASTER_MANAGER);
+    // $preapp->perm_account_del = 0 -> commission-account cannot be deleted
+    
     // END if: logged-in user found from DB
     
 

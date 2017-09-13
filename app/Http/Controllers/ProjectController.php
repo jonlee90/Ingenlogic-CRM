@@ -1102,7 +1102,7 @@ class ProjectController extends Controller
   * @param $vars (optional): array of additional output to include in JSON output (by default, empty)
   * @return JSON with HTML outputs
   **/
-  public function jsonReload ($lead_id, $agency_id, $vars = [])
+  protected function jsonReload ($lead_id, $agency_id, $vars = [])
   {
     $log_src = $this->log_src.'@jsonReload';
 

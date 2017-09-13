@@ -52,9 +52,8 @@ class MasterServiceController extends Controller
     if ($db_rows) {
       foreach ($db_rows as $row)
         $row_parents[enc_id($row->id)] = $row->name;
-    } else
-      return log_ajax_err('System was unable to get available Parent Services.', ['src'=>$log_src, 'msg'=>'0 parent services found.', 'service-id'=>$svc_id], 'err');
-
+    }
+    
 		$html_output = '
       <div class="overlay-form">
         '.Form::open(['url'=>route('master.service.create'), 'method'=> 'PUT']).'

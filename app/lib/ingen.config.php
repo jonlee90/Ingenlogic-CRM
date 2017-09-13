@@ -1,8 +1,13 @@
 <?php
 /**
- * configure.php
- *  constant definition will be defined here
- */
+* configure.php
+*  constant definition will be defined here
+*
+* php.ini configuration to be made:
+*  max-upload-size: 10M or above (total file size per location is set to 10M)
+*  post-max: 10M or above (total file size per location is set to 10M)
+*  file-upload-limit: 20 or above (set enough # of files for uploading)
+*/
  
 // ***** test purpose, set to empty string (or '/') on LIVE
 define ("BASE_FOLDER", '/');

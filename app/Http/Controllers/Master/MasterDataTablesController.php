@@ -604,6 +604,7 @@ class MasterDataTablesController extends Controller
     if ($db_rows_paginated) {
       foreach ($db_rows_paginated as $row) {
         $r_enc_id = enc_id($row->id);
+        $r_enc_lead_id = enc_id($row->lead_id);
         
         if ($row->is_complete)
           $r_status = 'Project Completed';
@@ -617,7 +618,17 @@ class MasterDataTablesController extends Controller
         else
           $r_agency = '(Not Assigned)';
 
-        $r_cell_act = '<a href="'.route('master.project.manage',['id'=> $r_enc_id]).'"><i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i></a>';
+        $r_cell_act = '
+          <a href="'.route('master.project.manage',['id'=> $r_enc_lead_id]).'" class="popup-base">
+            <i class="md s btn-mod-item">assignment_turned_in</i>
+            <div class="popup-tip"><div>Open Project Management</div></div>
+            </a>';
+        if ($row->is_complete)
+          $r_cell_act .= '
+            <a href="'.route('master.account.new',['id'=> $r_enc_id]).'" class="popup-base">
+              <i class="fa-usd btn-mod-item"></i>
+              <div class="popup-tip"><div>Convert to New Commission Account</div></div>
+              </a>';
         /*
         <th></th>
         <th>Agency</th>
@@ -630,7 +641,7 @@ class MasterDataTablesController extends Controller
           $r_cell_act,
           $r_status,
           $r_agency,
-          '<strong><a href="'.route('master.project.manage',['id'=> $r_enc_id]).'">'.$row->cust_name.'</a></strong>',
+          '<strong><a href="'.route('master.project.manage',['id'=> $r_enc_lead_id]).'">'.$row->cust_name.'</a></strong>',
           format_tel($row->tel),
           format_city_state_zip($row->city, $row->state_code, $row->zip),
         ];
@@ -706,6 +717,7 @@ class MasterDataTablesController extends Controller
     if ($db_rows_paginated) {
       foreach ($db_rows_paginated as $row) {
         $r_enc_id = enc_id($row->id);
+        $r_enc_lead_id = enc_id($row->lead_id);
         
         if ($row->is_complete)
           $r_status = 'Project Completed';
@@ -720,8 +732,10 @@ class MasterDataTablesController extends Controller
           $r_agency = '(Not Assigned)';
 
         $r_cell_act = '
-          <a href="'.route('master.project.manage',['id'=> enc_id($row->lead_id)]).'"><i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i></a>
-        ';
+          <a href="'.route('master.project.manage',['id'=> $r_enc_lead_id]).'" class="popup-base">
+            <i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i>
+            <div class="popup-tip"><div>Open Project Management</div></div>
+            </a>';
         /*
         <th></th>
         <th>Agency</th>
@@ -734,7 +748,7 @@ class MasterDataTablesController extends Controller
           $r_cell_act,
           $r_status,
           $r_agency,
-          '<strong><a href="'.route('master.project.manage',['id'=>  enc_id($row->lead_id)]).'">'.$row->cust_name.'</a></strong>',
+          '<strong><a href="'.route('master.project.manage',['id'=> $r_enc_lead_id]).'">'.$row->cust_name.'</a></strong>',
           format_tel($row->tel),
           format_city_state_zip($row->city, $row->state_code, $row->zip),
         ];
@@ -810,6 +824,7 @@ class MasterDataTablesController extends Controller
     if ($db_rows_paginated) {
       foreach ($db_rows_paginated as $row) {
         $r_enc_id = enc_id($row->id);
+        $r_enc_lead_id = enc_id($row->lead_id);
         
         if ($row->is_complete)
           $r_status = 'Project Completed';
@@ -824,8 +839,10 @@ class MasterDataTablesController extends Controller
           $r_agency = '(Not Assigned)';
 
         $r_cell_act = '
-          <a href="'.route('master.project.manage',['id'=> enc_id($row->lead_id)]).'"><i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i></a>
-        ';
+          <a href="'.route('master.project.manage',['id'=> $r_enc_lead_id]).'" class="popup-base">
+            <i title="Project Management" class="md s btn-mod-item">assignment_turned_in</i>
+            <div class="popup-tip"><div>Open Project Management</div></div>
+            </a>';
         /*
         <th></th>
         <th>Agency</th>
@@ -838,7 +855,7 @@ class MasterDataTablesController extends Controller
           $r_cell_act,
           $r_status,
           $r_agency,
-          '<strong><a href="'.route('master.project.manage',['id'=>  enc_id($row->lead_id)]).'">'.$row->cust_name.'</a></strong>',
+          '<strong><a href="'.route('master.project.manage',['id'=> $r_enc_lead_id]).'">'.$row->cust_name.'</a></strong>',
           format_tel($row->tel),
           format_city_state_zip($row->city, $row->state_code, $row->zip),
         ];

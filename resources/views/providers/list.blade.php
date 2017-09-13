@@ -22,7 +22,10 @@
 <script src="/js/jquery.dataTables.min.js"></script>
 <script>
 function aProviderList() {
-  openDataTable('#tbl-provider-list', "{{ route('datatables.providers') }}", { _token: "{{ csrf_token() }}" });
+  openDataTable({
+    tblSelector: '#tbl-provider-list', url: "{{ route('datatables.providers') }}",
+    data: { _token: "{{ csrf_token() }}" },
+  });
 }
 aProviderList();
 </script>

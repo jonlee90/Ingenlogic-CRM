@@ -12,17 +12,13 @@
   <div class="err no-provider-prod">Selected Provider does not have any products available.</div>
   @else
   <?php
-    // ********** show the rest of form only if there are products ********** 
-    $row_prod_options = [];
+  // ********** show the rest of form only if there are products ********** 
   ?>
   <div class="lead-list-available">
     <table id="tbl-lead-product-available">
       <thead><tr> <th></th> <th>Services</th> <th>Name</th> <th>Default Spiff</th> <th>Default Residual</th> <th>Price</th> </tr></thead>
       <tbody>
       @forelse ($products as $prod)
-        <?php
-        $row_prod_options[enc_id($prod->id)] = $prod->p_name;
-        ?>
         <tr data-id="{{ enc_id($prod->id) }}" class="btn-prod-add">
           <td><i class="fa-plus-square" title="Add Service"></i></td>
           <td class="prod-service">{{ $prod->svc_name }}</td>

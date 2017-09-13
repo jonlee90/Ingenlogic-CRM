@@ -43,7 +43,8 @@ function format_tel($tel) {
  * return date formatted to "m/d/Y"
 *************************************************************/
 function format_date($date) {
-	return date('m/d/Y', strtotime($date));
+	$time = strtotime($date);
+	return ($time)?  date('m/d/Y', $time) : FALSE;
 }
 /**
 * ************** format city, state, zip ****************
@@ -168,13 +169,7 @@ function log_write($msg, $vars = [], $severe_lv = NULL) {
 *************************************************************/
 function log_redirect($msg, $vars, $severe_lv ='err', $link = NULL) {
 	log_write($msg, $vars, $severe_lv);
-	session()->put('toast_msg', '<span class="err">'.$msg.'</span>');
-	
-	if ($link === NULL)
-		return redirect()->back()
-			->withInput();
-	return redirect()->to($link)
-		->withInput();
+	return err_redirect($msg, $link);
 }
 /**
 * ************** msg_redirect ****************
@@ -184,7 +179,7 @@ function log_redirect($msg, $vars, $severe_lv ='err', $link = NULL) {
 * @param string $link: link to redirect to - default to back()
 *
 * @return return value of Redirect::to
-**/
+*/
 function msg_redirect($msg, $link = NULL) {
 	session()->put('toast_msg', '<span class="info">'.$msg.'</span>');
 	
@@ -193,12 +188,30 @@ function msg_redirect($msg, $link = NULL) {
 	return redirect()->to($link);
 }
 /**
+* ************** err_redirect ****************
+* redirect to page with err-output message to user, 
+*
+* @param string $msg
+* @param string $link: link to redirect to - default to back()
+*
+* @return return value of Redirect::to -> withInput()
+*/
+function err_redirect($msg, $link = NULL) {
+	session()->put('toast_msg', '<span class="err">'.$msg.'</span>');
+	
+	if ($link === NULL)
+		return redirect()->back()
+			->withInput();
+	return redirect()->to($link)
+		->withInput();
+}
+/**
 * ***************** no_access *****************
 * use Illuminate\Support\Facades\Auth; 
 *  shortcut to log_redirect specifically when user has NO access to the page/action
 *
 * @param array $vars: additional variable(s) to include in the log
-**/
+*/
 function no_access ($vars =[]) {
 	return log_redirect('You have No Access to the Page.', 
 		array_merge(
@@ -212,7 +225,7 @@ function no_access ($vars =[]) {
 * @param string $msg
 * @param array $vars
 * @return JSON: error flag to 1 with message
-**/
+*/
 function log_ajax_err ($msg, $vars =[]) {
 	log_write($msg, $vars, 'err');
 	return json_encode(array(

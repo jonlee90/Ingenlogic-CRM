@@ -354,7 +354,7 @@ window.aProjectManage = function() {
     $sectionLeadControlAccount.find('#selected-customer').html('').html(json.custHTML);
     $sectionLeadControlAccount.find('.ctrl-follower .ctrl-content').html('').html(json.followerHTML);
     $locSelect.html('').html(json.locOptHTML);
-    $sectionLeadControlAccount.find('.ctrl-logs .ctrl-content ul').html('').html(json.logHTML);
+    $sectionLeadControlAccount.find('.ctrl-logs .ctrl-content').html('').html(json.logHTML);
 
     var $locList = $('section.lead-frame-content .list-locations');
     $locList.html('').html(json.locHTML);
@@ -416,20 +416,24 @@ window.aProjectManage = function() {
       
       if (this.files.length >0) {
         // validate: file size must be greater than 0 byte, 10 MB limit
-        var size_limit = 10; // MB
-        var total_size = parseInt( $('#overlay-pane .lead-loc-list-files').attr('data-size') );
-        total_size = (total_size >0)?  total_size : 0;
+        var sizeLimit = 10; // MB
 
-        // validate: valid image types
+        var totalByte = 0;
+        $('#overlay-pane .lead-loc-list-files > li').each(function() {
+          var sizeBytes = parseInt( $(this).attr('data-size') );
+          if (sizeBytes >=0)
+            totalByte += sizeBytes;
+        });
+
         for (var i=0; i<this.files.length; i++) {
           var f = this.files[i];
           
           if (f.size <= 0)
             return clearFile('File size must be greater than 0 byte.');
 
-          total_size += f.size;
-          if (total_size > size_limit  *1048576)
-            return clearFile("Total File size is limited to " + size_limit + " MB.");
+          totalByte += f.size;
+          if (totalByte > sizeLimit  *1048576)
+            return clearFile("Total File size is limited to " + sizeLimit + " MB.");
         }
         // add preview of uploaded files
         $wrapper.find('label.file-label').removeClass('empty');

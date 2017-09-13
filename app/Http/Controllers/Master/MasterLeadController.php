@@ -81,7 +81,7 @@ class MasterLeadController extends Controller
     $log_src = $this->log_src.'@create';
     $preapp = $request->get('preapp');
     $me = Auth::user();
-
+    
     
     // input validation
     $v = Validator::make($request->all(), [
@@ -89,12 +89,16 @@ class MasterLeadController extends Controller
       'tel' => ['required', 'max:10', 'regex:/^\d{10}$/'],
       'tax_id' => ['nullable', 'regex:/^\d{2}-\d{7}$/'],
       'email' => 'nullable|email',
-      'state_id' => 'nullable|numeric',
-      'zip' => ['nullable', 'max:10', 'regex:/^\d{5}(-\d{4})?$/'],
+      'addr' => 'nullable|required_if:create_loc,1',
+      'city' => 'nullable|required_if:create_loc,1',
+      'state_id' => 'nullable|numeric|required_if:create_loc,1',
+      'zip' => ['nullable', 'max:10', 'required_if:create_loc,1', 'regex:/^\d{5}(-\d{4})?$/'],
     ], [
       'c_name.*'=> 'Customer Name is required.',
       'tel.*'=> 'Please enter the 10 digit Phone Number without dashes and spaces.',
       'tax_id.*'=> 'Please enter a valid Tax ID number (12-3456789 format).',
+      'addr.*' => 'Address is required if Create Location is checked',
+      'city.*' => 'City is required if Create Location is checked',
       'email.*'=> 'Please enter a valid Email Address.',
       'state_id.*'=> 'Invalid State ID entered.',
       'zip.*'=> 'Please use a valid US Zip code.',
@@ -134,10 +138,28 @@ class MasterLeadController extends Controller
       DB::table('lead_relation_manager')->insert([
         'lead_id'=> $lead_id, 'user_id' => $preapp->manager_id, 'is_primary' => DB::raw(1), 
       ]);
-    
 
+    $log_msg = '<p>New Lead has been created.</p><p>[Customer] '.$request->c_name.'</p>';
+    $log_vars = ['src'=> $log_src, 'manager-id'=> $preapp->manager_id, 'lead-id'=> $lead_id, ];
+
+    // if create-location checker is checked: create new location with the same address
+    if ($request->create_loc) {
+      $loc_id = DB::table('lead_locations')->insertGetId([
+        'lead_id'=> $lead_id,
+        'name'=> 'New Location',
+        'addr' => $p_addr, 'addr2' => $p_addr2,
+        'city' => $p_city, 'state_id' => $p_state_id, 'zip' => $p_zip,
+      ]);
+      
+      $log_msg = '<p>New Lead has been created with Location.</p><p>[Customer] '.$request->c_name.'</p>';
+      $log_vars['location-id'] = $loc_id;
+    }
+
+    
     // action SUCCESS: leave a log and redirect to view
-    log_write('New Lead Created.', ['src'=> $log_src, 'lead-id'=> $lead_id]);
+    $log_id = log_lead_values((object) ['id' => $lead_id, 'msg' => $log_msg, ]);
+    $log_vars['log_id'] = $log_id;
+    log_write('New Lead Created.', $log_vars);
     return msg_redirect('The Lead has been created. Please continue with location and services', route('master.lead.manage', ['id'=> enc_id($lead_id)]));
   }
   
@@ -363,7 +385,7 @@ class MasterLeadController extends Controller
   * @param $vars (optional): array of additional output to include in JSON output (by default, empty)
   * @return JSON with HTML outputs
   */
-  public function jsonReload ($lead_id, $manager_id, $vars = [])
+  protected function jsonReload ($lead_id, $manager_id, $vars = [])
   {
     $log_src = $this->log_src.'@jsonReload';
     $me = Auth::user();

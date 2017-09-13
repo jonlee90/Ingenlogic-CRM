@@ -54,7 +54,7 @@
   -moz-osx-font-smoothing: grayscale;
   
     vertical-align: top; box-sizing: border-box;
-    width: 20px; height: 20px; line-height: 20px;
+    width: 20px; line-height: 16px;
     text-align: center;
 }
 /************************** END Font-Awesome *********************/
@@ -210,6 +210,7 @@ input.w100, input.w150, input.w200, input.w300, input.w400,
 .hide { display: none; }
 .money::before { content: '$'; margin-right: 5px; }
 .inform { padding-left: 3px; font-size: 0.6rem; }
+td.money::before { float: left; }
 div.spacer-h { width: calc(100% - 30px); height: 1px; margin: 20px auto; border-top:1px solid #ddd; }
 
 [class^="col-"], [class*=" col-"] { display: inline-block; vertical-align: top; }
@@ -613,7 +614,7 @@ table tbody td.not-found { padding: 10px; color: #f00; }
 }
 #overlay-pane section.bar .overlay-close:hover { color: #f00; }
 #overlay-pane section.bar .overlay-close .fa-remove { font-size: 18px; line-height: 18px; }
-#overlay-pane section.body { display: flex; /* height: calc(100% - 40px); */ padding: 20px; overflow-y: auto; }
+#overlay-pane section.body { display: flex; min-height: 350px; /* height: calc(100% - 40px); */ padding: 20px; overflow-y: auto; }
 #overlay-pane section.body > * { width: 100%; }
 #overlay-pane .overlay-load-spinner {
   display: none; /* by default, the spinner is hidden */
@@ -668,7 +669,7 @@ table tbody td.not-found { padding: 10px; color: #f00; }
 /***** back-to-top button *****/
 #back-to-top {
   cursor: pointer; display: none;
-  z-index: 100; position: fixed; bottom: 10px; right: 3px;
+  z-index: 100; position: fixed; bottom: 10px; right: 5px;
   width: 50px; height: 50px;
   background: #fff; border: 1px solid #ccc; border-radius: 50%;
   font-size: 0; text-align: center;
@@ -979,12 +980,27 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
   font-feature-settings: 'liga';
 }
 .lead-log-history .tag-log-corrected,
-.lead-log-history .tag-log-system { 
+ .lead-log-history .tag-log-system { 
   position: absolute; top: 0; right: 0;
   padding: 3px 8px; border-radius: 3px;
   background: #999; color: white;
 }
+.lead-log-history .tag-log-corrected::before { content: "corrected"; }
+.lead-log-history .tag-log-system::before { content: "system"; }
+.lead-log-history .log-msg + .log-detail { margin-top: 10px; }
+.lead-log-history .log-detail tr { opacity: 0.3; }
+.lead-log-history .log-detail tr.changed,
+ .lead-log-history .log-detail tr.old,
+ .lead-log-history .log-detail tr.new { opacity: 1; }
+.lead-log-history .log-detail tr.old td,
+ .lead-log-history .log-detail tr.changed td.old { background: #ffc; }
+.lead-log-history .log-detail tr.new td,
+ .lead-log-history .log-detail tr.changed td.new { background: #cfc; }
+.lead-log-history .log-detail > :not(:first-child) { margin-top: 5px; }
+.lead-log-history .log-detail ul.lead-log-files { margin-left: 20px; list-style: square; }
 
+
+/*** Jon code ***/
 .log-alarm-auto {
   position: absolute;
   right: 65px;
@@ -1024,21 +1040,6 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
 .btn-view-alerts {
   margin: 5px 0px 20px!important;
 }
-
-.lead-log-history .tag-log-corrected::before { content: "corrected"; }
-.lead-log-history .tag-log-system::before { content: "system"; }
-.lead-log-history .log-msg + .log-detail { margin-top: 10px; }
-.lead-log-history .log-detail tr { opacity: 0.3; }
-.lead-log-history .log-detail tr.changed,
- .lead-log-history .log-detail tr.old,
- .lead-log-history .log-detail tr.new { opacity: 1; }
-.lead-log-history .log-detail tr.old td,
- .lead-log-history .log-detail tr.changed td.old { background: #ffc; }
-.lead-log-history .log-detail tr.new td,
- .lead-log-history .log-detail tr.changed td.new { background: #cfc; }
-.lead-log-history .log-detail > :not(:first-child) { margin-top: 5px; }
-.lead-log-history .log-detail ul.lead-log-files { margin-left: 20px; list-style: square; }
-
 @media screen and (min-width: 701px) {
   #overlay-pane .lead-log-history {
     height: calc(100% - 50px);
@@ -1188,7 +1189,7 @@ tr:last-child:not(.deleted) .reorder-btns .btn-next:hover { background: #eee; }
 .wrapper.lead-management .location .account .project-overlay::before,
  .wrapper.lead-management .location .account .complete-overlay::before {
   position: absolute; top: -10px; right: 10px;
-  border: 2px solid #f53d3d; border-radius: 10px; background: #fff;
+  border: 2px solid #f53d3d; border-radius: 7px; background: #fff;
   color: #f53d3d; font-weight: bold; text-transform: uppercase; white-space: nowrap;
   box-shadow: 0 5px 10px rgba(0,0,0, 0.3);
 }
