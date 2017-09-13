@@ -23,41 +23,43 @@ trait AlertTrait
 
         $type_id = dec_id($request->id);
         $follower_count = count($users);
+        if($follower_count > 0) {
+            $followers = DB::table('login_users')
+                                ->select('id', 'fname', 'lname', 'title', 'tel', 'email', 'access_lv')
+                                ->whereIn('id', $users)->get();
 
-        $followers = DB::table('login_users')
-                            ->select('id', 'fname', 'lname', 'title', 'tel', 'email', 'access_lv')
-                            ->whereIn('id', $users)->get();
-
-        $alerted_followers = DB::select(
-                " SELECT a.to_user_id as user_id,  
-                a.is_read,
-                TRIM(CONCAT(u.fname,' ',u.lname)) AS f_name,
-                u.title AS title,
-                u.tel AS tel,
-                u.email AS email
-                FROM alerts as a
-                LEFT JOIN login_users as u ON u.id = a.to_user_id
-                WHERE a.alert_type_id =:type_id AND a.log_id =:log_id
-                GROUP BY a.to_user_id
-            ", [$type_id, $log_id]);
-        
-        $alerted_followers_count = count($alerted_followers);
-        for($i = 0; $i < $follower_count; $i++) {
-            $flag = true;
-            $currentFollower = $followers[$i];
-            $currentFollower->access_lv = config_pos_name($currentFollower->access_lv);
-            for($j = 0; $j < $alerted_followers_count; $j++) {
-                if($alerted_followers[$j]->user_id == $currentFollower->id) {
-                    // mark current follower as read if the user already received an alert
-                    $currentFollower->is_read = 1;
-                    $flag = false;
+            $alerted_followers = DB::select(
+                    " SELECT a.to_user_id as user_id,  
+                    a.is_read,
+                    TRIM(CONCAT(u.fname,' ',u.lname)) AS f_name,
+                    u.title AS title,
+                    u.tel AS tel,
+                    u.email AS email
+                    FROM alerts as a
+                    LEFT JOIN login_users as u ON u.id = a.to_user_id
+                    WHERE a.alert_type_id =:type_id AND a.log_id =:log_id
+                    GROUP BY a.to_user_id
+                ", [$type_id, $log_id]);
+            
+            $alerted_followers_count = count($alerted_followers);
+            for($i = 0; $i < $follower_count; $i++) {
+                $flag = true;
+                $currentFollower = $followers[$i];
+                $currentFollower->access_lv = config_pos_name($currentFollower->access_lv);
+                for($j = 0; $j < $alerted_followers_count; $j++) {
+                    if($alerted_followers[$j]->user_id == $currentFollower->id) {
+                        // mark current follower as read if the user already received an alert
+                        $currentFollower->is_read = 1;
+                        $flag = false;
+                    }
+                }
+                if($flag) {
+                    $currentFollower->is_read = 0;
                 }
             }
-            if($flag) {
-                $currentFollower->is_read = 0;
-            }
+        }else {
+            $followers = null;
         }
-   
         $html_output =
         view($view)
         ->with('type_id', $type_id)
@@ -149,9 +151,14 @@ trait AlertTrait
             FROM lead_follower_masters 
             WHERE lead_id =$id;
         ");
-        for($i = 0; $i < count($followers); $i++) 
-        {
-            $followers_id[] = $followers[$i]->user_id;
+        $follower_count = count($followers);
+        if($follower_count > 0) {
+            for($i = 0; $i < $follower_count; $i++) 
+            {
+                $followers_id[] = $followers[$i]->user_id;
+            }
+        }else {
+            $followers_id = null;
         }
         return $followers_id;
     }

@@ -27,7 +27,7 @@
           <td class="row-email">{{ $follower->email }}</td>
         </tr>
       @empty
-          
+        <tr><td colspan="9" class="not-found">* 0 Followers found.</td></tr>
       @endforelse
       </tbody>
     </table>
