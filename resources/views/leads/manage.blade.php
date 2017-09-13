@@ -1227,21 +1227,17 @@ window.aLeadManage = function() {
 
   /*** Jon code ***/
   $(document).on('click', '.btn-log-alarm', function() {
-      var userId = [];
       var logId = $(this).find('.log-id').val();
-      $('.follower-id').each(function() {
-        userId.push($(this).val());
-      });
       overlay.setTitle('Send Alert');
       overlay.setContent(
         $('<div/>', {class: ''})
           .append($('<div/>', {class: 'container-change agent'}))
       );
-      // by default open 'update provider'
+
       reqAjax({
         url: laraRoute('lead.overlay-alert-mod') + encLeadId,
         method: 'GET', 
-        data: { users: userId, log: logId, alertType: 1 },
+        data: { log: logId, alertType: 1 },
         fnSuccess: fnFillContainerChange,
         fnFail: function(json) { alertUser(json.msg); overlay.close(); },
       }); // END: reqAjax
