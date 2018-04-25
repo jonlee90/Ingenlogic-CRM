@@ -1,10 +1,7 @@
 <?php
 /**
 * required vars
-* @param $lead_id: lead ID
-* @param $frm_url: URL to submit form
-* @param $followers: available users (follower)
-* @param $alerted_followers: currently saved lead x follower-follower objects
+* @param $alerts: alert object
 */
 
 ?>
@@ -15,9 +12,9 @@
 </style>
 <div class="overlay-form overlay-lead-product">
   <h2>Alerts</h2>
-
   <div class="lead-list-available follower">
     <div class='alerts-container'>
+
       @if(count($alerts) > 0)
         @foreach ($alerts as $alert)
           <div class='alert-container' style='background-color: {{ $alert->is_read == 0 ? "rgba(248, 246, 149, .6)" : "" }}'>
@@ -40,6 +37,7 @@
       @else 
         <p class="not-found">* 0 Alerts found.</p>
       @endif
+      
     </div>
   </div>
 </div>

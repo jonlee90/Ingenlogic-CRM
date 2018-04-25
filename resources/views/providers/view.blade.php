@@ -1,3 +1,10 @@
+<?php
+/**
+* required vars
+* @param $prov: provider object
+* @param $data->row_contacts: array of contacts and products
+*/
+?>
 @extends('layouts.app')
 
 @section('title', "Provider Overview | ".SITE_TITLE." Control Panel v2")

@@ -621,8 +621,9 @@ class LeadController extends Controller
     return $this->traitLocationFileDelete($request);
   }
 
-  /** Jon code ***/
-  // Action alert list
+  /**
+  * Action: Alert
+  */
   public function ajaxAlertSend(Request $request)
   {
     return $this->traitAlertSend($request, route('lead.manage', ['id'=> $request->id]));

@@ -1,7 +1,6 @@
 <?php
 /**
 * required vars
-* @param $lead_id: lead ID
 * @param $frm_url: URL to submit form
 * @param $agents: available users (agent)
 * @param $prov_contacts: available provider contacts

@@ -1032,9 +1032,4 @@ trait LeadTrait
     ]);
   }
 
-  /*
-  public function getLead ($lead_id, $agency_id) {
-    return parent::getLead($lead_id, $agency_id);
-  }
-  */
 }

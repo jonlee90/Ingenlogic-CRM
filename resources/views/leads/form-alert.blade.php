@@ -1,10 +1,7 @@
 <?php
 /**
 * required vars
-* @param $lead_id: lead ID
-* @param $frm_url: URL to submit form
 * @param $followers: available users (follower)
-* @param $alerted_followers: currently saved lead x follower-follower objects
 */
 
 ?>
